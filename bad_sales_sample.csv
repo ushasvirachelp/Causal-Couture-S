@@ -1,0 +1,4 @@
+date,sku_id,units_sold,revenue
+2025-07-01,SKU001,five,250
+wrong-date,SKU002,3,180
+2025-07-03,,8,400

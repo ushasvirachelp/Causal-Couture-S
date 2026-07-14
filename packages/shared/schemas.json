@@ -1,0 +1,24 @@
+{
+  "sales": {
+    "required_columns": ["date", "sku_id", "units_sold", "revenue"],
+    "date_columns": ["date"],
+    "numeric_columns": ["units_sold", "revenue"]
+  },
+  "inventory": {
+    "required_columns": ["date", "sku_id", "opening_stock", "closing_stock"],
+    "date_columns": ["date"],
+    "numeric_columns": ["opening_stock", "closing_stock"]
+  },
+  "social": {
+    "required_columns": ["date", "sku_id", "engagement", "impressions"],
+    "date_columns": ["date"],
+    "numeric_columns": ["engagement", "impressions"]
+  },
+  "web": {
+    "required_columns": ["date", "sku_id", "product_views", "add_to_cart"],
+    "date_columns": ["date"],
+    "numeric_columns": ["product_views", "add_to_cart"]
+  }
+}
+
+
