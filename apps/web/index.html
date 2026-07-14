@@ -6,7 +6,7 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      max-width: 720px;
+      max-width: 900px;
       margin: 40px auto;
       padding: 20px;
       line-height: 1.5;
@@ -16,12 +16,14 @@
       border-radius: 12px;
       padding: 20px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
     }
     button {
       padding: 10px 16px;
       border: none;
       border-radius: 8px;
       cursor: pointer;
+      margin-right: 8px;
     }
     pre {
       background: #f7f7f7;
@@ -29,17 +31,18 @@
       border-radius: 8px;
       overflow-x: auto;
     }
-    select, input[type="file"] {
+    select, input[type="file"], input[type="text"] {
       margin-bottom: 12px;
       display: block;
       width: 100%;
+      padding: 8px;
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>Causal Couture — Phase 1 Upload</h1>
-    <p>Upload a CSV file and validate it against one of the 4 source schemas.</p>
+    <h1>Causal Couture — Phase 1 + Phase 2 Starter</h1>
+    <p>Upload a CSV file, validate it, save it, and generate starter features.</p>
 
     <label for="sourceType">Source Type</label>
     <select id="sourceType">
@@ -52,10 +55,29 @@
     <label for="fileInput">Choose CSV File</label>
     <input type="file" id="fileInput" accept=".csv" />
 
-    <button onclick="uploadFile()">Upload and Validate</button>
+    <button onclick="uploadFile()">Upload + Process</button>
 
-    <h3>Result</h3>
+    <h3>Upload Result</h3>
     <pre id="result">No file uploaded yet.</pre>
+  </div>
+
+  <div class="card">
+    <h2>Phase 3 Starter Analysis</h2>
+    <label for="analysisSourceType">Source Type</label>
+    <select id="analysisSourceType">
+      <option value="sales">sales</option>
+      <option value="inventory">inventory</option>
+      <option value="social">social</option>
+      <option value="web">web</option>
+    </select>
+
+    <label for="processedFilename">Processed Filename</label>
+    <input type="text" id="processedFilename" placeholder="Paste processed filename here" />
+
+    <button onclick="runAnalysis()">Run Phase 3 Starter Analysis</button>
+
+    <h3>Analysis Result</h3>
+    <pre id="analysisResult">No analysis run yet.</pre>
   </div>
 
   <script>
@@ -81,11 +103,38 @@
 
         const data = await response.json();
         resultBox.textContent = JSON.stringify(data, null, 2);
+
+        if (data.saved_processed_file) {
+          const parts = data.saved_processed_file.split("/");
+          const filename = parts[parts.length - 1];
+          document.getElementById("processedFilename").value = filename;
+          document.getElementById("analysisSourceType").value = sourceType;
+        }
       } catch (error) {
         resultBox.textContent = "Error connecting to API: " + error;
+      }
+    }
+
+    async function runAnalysis() {
+      const sourceType = document.getElementById("analysisSourceType").value;
+      const processedFilename = document.getElementById("processedFilename").value;
+      const resultBox = document.getElementById("analysisResult");
+
+      if (!processedFilename) {
+        resultBox.textContent = "Please enter a processed filename.";
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `http://127.0.0.1:8000/phase3/analyze?source_type=${sourceType}&processed_filename=${processedFilename}`
+        );
+        const data = await response.json();
+        resultBox.textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        resultBox.textContent = "Error running analysis: " + error;
       }
     }
   </script>
 </body>
 </html>
-
