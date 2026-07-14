@@ -34,11 +34,7 @@ with open(SCHEMA_PATH, "r") as f:
 def validate_dataframe(df: pd.DataFrame, source_type: str) -> dict[str, Any]:
     schema = SCHEMAS.get(source_type)
     if not schema:
-        return {
-            "valid": False,
-            "errors": [f"Unknown source type: {source_type}"],
-            "summary": {}
-        }
+        return {"valid": False, "errors": [f"Unknown source type: {source_type}"], "summary": {}}
 
     errors = []
     warnings = []
@@ -86,12 +82,7 @@ def validate_dataframe(df: pd.DataFrame, source_type: str) -> dict[str, Any]:
         "source_type": source_type
     }
 
-    return {
-        "valid": len(errors) == 0,
-        "errors": errors,
-        "warnings": warnings,
-        "summary": summary
-    }
+    return {"valid": len(errors) == 0, "errors": errors, "warnings": warnings, "summary": summary}
 
 
 def clean_dataframe(df: pd.DataFrame, source_type: str) -> pd.DataFrame:
@@ -217,6 +208,68 @@ def read_processed_csv(filename: str) -> pd.DataFrame:
     return pd.read_csv(file_path)
 
 
+def clamp_score(value: float) -> float:
+    return max(0.0, min(100.0, round(value, 2)))
+
+
+def unified_scorecard(df: pd.DataFrame) -> dict[str, Any]:
+    demand_pressure = 0.0
+    stock_risk = 0.0
+    engagement_momentum = 0.0
+    conversion_strength = 0.0
+
+    if "units_sold" in df.columns:
+        avg_units = pd.to_numeric(df["units_sold"], errors="coerce").fillna(0).mean()
+        demand_pressure = clamp_score(avg_units * 10)
+
+    if "closing_stock" in df.columns:
+        avg_stock = pd.to_numeric(df["closing_stock"], errors="coerce").fillna(0).mean()
+        stock_risk = clamp_score(100 - (avg_stock * 8))
+
+    if "engagement_rate" in df.columns:
+        avg_eng = pd.to_numeric(df["engagement_rate"], errors="coerce").fillna(0).mean()
+        engagement_momentum = clamp_score(avg_eng * 10000)
+
+    elif "engagement" in df.columns:
+        avg_eng_raw = pd.to_numeric(df["engagement"], errors="coerce").fillna(0).mean()
+        engagement_momentum = clamp_score(avg_eng_raw / 2)
+
+    if "view_to_cart_rate" in df.columns:
+        avg_conv = pd.to_numeric(df["view_to_cart_rate"], errors="coerce").fillna(0).mean()
+        conversion_strength = clamp_score(avg_conv * 1000)
+
+    elif {"add_to_cart", "product_views"}.issubset(df.columns):
+        views = pd.to_numeric(df["product_views"], errors="coerce").fillna(0).sum()
+        carts = pd.to_numeric(df["add_to_cart"], errors="coerce").fillna(0).sum()
+        conversion_strength = clamp_score((carts / views) * 1000) if views > 0 else 0
+
+    overall_signal = clamp_score(
+        (0.35 * demand_pressure) +
+        (0.25 * (100 - stock_risk)) +
+        (0.20 * engagement_momentum) +
+        (0.20 * conversion_strength)
+    )
+
+    if overall_signal >= 70:
+        recommendation = "High momentum — monitor closely and consider inventory prioritization."
+    elif overall_signal >= 45:
+        recommendation = "Moderate signal — continue tracking and validate across more days."
+    else:
+        recommendation = "Weak signal — avoid overcommitting inventory until stronger evidence appears."
+
+    return {
+        "phase_3_status": "starter_scaffold_plus_scorecard",
+        "analysis_type": "unified_signal_scorecard",
+        "demand_pressure_score": demand_pressure,
+        "stock_risk_score": stock_risk,
+        "engagement_momentum_score": engagement_momentum,
+        "conversion_strength_score": conversion_strength,
+        "overall_signal_score": overall_signal,
+        "recommendation": recommendation,
+        "note": "These are heuristic starter scores to support early-stage decision reasoning before full causal effect modeling."
+    }
+
+
 @app.get("/health")
 def health_check() -> dict[str, str]:
     return {"status": "ok"}
@@ -251,8 +304,7 @@ def phase2_summary(processed_filename: str) -> dict[str, Any]:
         return {"error": f"Processed file not found: {processed_filename}"}
 
     df = pd.read_csv(file_path)
-
-    summary = {
+    return {
         "rows": int(df.shape[0]),
         "columns": list(df.columns),
         "unique_skus": int(df["sku_id"].nunique()) if "sku_id" in df.columns else 0,
@@ -260,7 +312,6 @@ def phase2_summary(processed_filename: str) -> dict[str, Any]:
         "date_max": str(df["date"].max()) if "date" in df.columns and len(df) else None,
         "preview_rows": df.head(5).fillna("").to_dict(orient="records")
     }
-    return summary
 
 
 @app.post("/phase2/build-unified")
@@ -319,6 +370,16 @@ def build_unified_dataset(
         "columns": list(unified.columns),
         "preview_rows": unified.head(5).fillna("").to_dict(orient="records")
     }
+
+
+@app.get("/phase3/scorecard")
+def phase3_scorecard(processed_filename: str) -> dict[str, Any]:
+    file_path = UNIFIED_DIR / processed_filename
+    if not file_path.exists():
+        return {"error": f"Unified file not found: {processed_filename}"}
+
+    df = pd.read_csv(file_path)
+    return unified_scorecard(df)
 
 
 @app.get("/phase3/analyze")
