@@ -6,7 +6,7 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      max-width: 1000px;
+      max-width: 1100px;
       margin: 40px auto;
       padding: 20px;
       line-height: 1.5;
@@ -37,18 +37,14 @@
       display: block;
       width: 100%;
       padding: 8px;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
+      box-sizing: border-box;
     }
   </style>
 </head>
 <body>
   <div class="card">
     <h1>Causal Couture — Local Prototype</h1>
-    <p>Phase 1 upload + Phase 2 processing + Phase 3 starter analysis.</p>
+    <p>Phase 1 upload, Phase 2 unified dataset build, and Phase 3 starter analysis + scorecard.</p>
   </div>
 
   <div class="card">
@@ -99,7 +95,7 @@
   </div>
 
   <div class="card">
-    <h2>4) Run Analysis</h2>
+    <h2>4) Run Starter Analysis</h2>
 
     <label for="analysisSourceType">Source Type</label>
     <select id="analysisSourceType">
@@ -117,6 +113,18 @@
 
     <h3>Analysis Result</h3>
     <pre id="analysisResult">No analysis run yet.</pre>
+  </div>
+
+  <div class="card">
+    <h2>5) Run Unified Scorecard</h2>
+
+    <label for="scorecardFilename">Unified Filename</label>
+    <input type="text" id="scorecardFilename" placeholder="Paste unified filename here" />
+
+    <button onclick="runScorecard()">Run Unified Scorecard</button>
+
+    <h3>Scorecard Result</h3>
+    <pre id="scorecardResult">No scorecard run yet.</pre>
   </div>
 
   <script>
@@ -188,6 +196,7 @@
         if (data.unified_filename) {
           document.getElementById("processedFilename").value = data.unified_filename;
           document.getElementById("analysisSourceType").value = "unified";
+          document.getElementById("scorecardFilename").value = data.unified_filename;
         }
       } catch (error) {
         box.textContent = "Error building unified dataset: " + error;
@@ -212,6 +221,26 @@
         resultBox.textContent = JSON.stringify(data, null, 2);
       } catch (error) {
         resultBox.textContent = "Error running analysis: " + error;
+      }
+    }
+
+    async function runScorecard() {
+      const processedFilename = document.getElementById("scorecardFilename").value;
+      const resultBox = document.getElementById("scorecardResult");
+
+      if (!processedFilename) {
+        resultBox.textContent = "Please enter a unified filename.";
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `http://127.0.0.1:8000/phase3/scorecard?processed_filename=${processedFilename}`
+        );
+        const data = await response.json();
+        resultBox.textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        resultBox.textContent = "Error running scorecard: " + error;
       }
     }
   </script>

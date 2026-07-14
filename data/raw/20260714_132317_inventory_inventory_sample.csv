@@ -1,0 +1,4 @@
+date,sku_id,opening_stock,closing_stock
+2025-07-01,SKU001,20,15
+2025-07-02,SKU002,18,12
+2025-07-03,SKU003,25,17
