@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Causal Couture Upload</title>
+  <title>Causal Couture</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      max-width: 900px;
+      max-width: 1000px;
       margin: 40px auto;
       padding: 20px;
       line-height: 1.5;
@@ -23,13 +23,14 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      margin-right: 8px;
+      margin: 8px 8px 8px 0;
     }
     pre {
       background: #f7f7f7;
       padding: 12px;
       border-radius: 8px;
       overflow-x: auto;
+      white-space: pre-wrap;
     }
     select, input[type="file"], input[type="text"] {
       margin-bottom: 12px;
@@ -37,12 +38,21 @@
       width: 100%;
       padding: 8px;
     }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>Causal Couture — Phase 1 + Phase 2 Starter</h1>
-    <p>Upload a CSV file, validate it, save it, and generate starter features.</p>
+    <h1>Causal Couture — Local Prototype</h1>
+    <p>Phase 1 upload + Phase 2 processing + Phase 3 starter analysis.</p>
+  </div>
+
+  <div class="card">
+    <h2>1) Upload + Process</h2>
 
     <label for="sourceType">Source Type</label>
     <select id="sourceType">
@@ -62,19 +72,48 @@
   </div>
 
   <div class="card">
-    <h2>Phase 3 Starter Analysis</h2>
+    <h2>2) View Processed Files</h2>
+    <button onclick="loadProcessedFiles()">Load Processed Files</button>
+    <pre id="processedFilesResult">No processed files loaded yet.</pre>
+  </div>
+
+  <div class="card">
+    <h2>3) Build Unified Dataset</h2>
+
+    <label for="salesFile">Sales Processed Filename</label>
+    <input type="text" id="salesFile" placeholder="e.g. 20250714_171000_sales_processed.csv" />
+
+    <label for="inventoryFile">Inventory Processed Filename</label>
+    <input type="text" id="inventoryFile" placeholder="e.g. 20250714_171100_inventory_processed.csv" />
+
+    <label for="socialFile">Social Processed Filename</label>
+    <input type="text" id="socialFile" placeholder="e.g. 20250714_171200_social_processed.csv" />
+
+    <label for="webFile">Web Processed Filename</label>
+    <input type="text" id="webFile" placeholder="e.g. 20250714_171300_web_processed.csv" />
+
+    <button onclick="buildUnified()">Build Unified Dataset</button>
+
+    <h3>Unified Result</h3>
+    <pre id="unifiedResult">No unified dataset built yet.</pre>
+  </div>
+
+  <div class="card">
+    <h2>4) Run Analysis</h2>
+
     <label for="analysisSourceType">Source Type</label>
     <select id="analysisSourceType">
       <option value="sales">sales</option>
       <option value="inventory">inventory</option>
       <option value="social">social</option>
       <option value="web">web</option>
+      <option value="unified">unified</option>
     </select>
 
     <label for="processedFilename">Processed Filename</label>
-    <input type="text" id="processedFilename" placeholder="Paste processed filename here" />
+    <input type="text" id="processedFilename" placeholder="Paste processed or unified filename here" />
 
-    <button onclick="runAnalysis()">Run Phase 3 Starter Analysis</button>
+    <button onclick="runAnalysis()">Run Analysis</button>
 
     <h3>Analysis Result</h3>
     <pre id="analysisResult">No analysis run yet.</pre>
@@ -104,14 +143,54 @@
         const data = await response.json();
         resultBox.textContent = JSON.stringify(data, null, 2);
 
-        if (data.saved_processed_file) {
-          const parts = data.saved_processed_file.split("/");
-          const filename = parts[parts.length - 1];
-          document.getElementById("processedFilename").value = filename;
-          document.getElementById("analysisSourceType").value = sourceType;
+        if (data.processed_filename) {
+          document.getElementById("processedFilename").value = data.processed_filename;
+
+          if (sourceType === "sales") document.getElementById("salesFile").value = data.processed_filename;
+          if (sourceType === "inventory") document.getElementById("inventoryFile").value = data.processed_filename;
+          if (sourceType === "social") document.getElementById("socialFile").value = data.processed_filename;
+          if (sourceType === "web") document.getElementById("webFile").value = data.processed_filename;
         }
       } catch (error) {
         resultBox.textContent = "Error connecting to API: " + error;
+      }
+    }
+
+    async function loadProcessedFiles() {
+      const box = document.getElementById("processedFilesResult");
+      try {
+        const response = await fetch("http://127.0.0.1:8000/files/processed/by-source");
+        const data = await response.json();
+        box.textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        box.textContent = "Error loading processed files: " + error;
+      }
+    }
+
+    async function buildUnified() {
+      const box = document.getElementById("unifiedResult");
+
+      const formData = new FormData();
+      formData.append("sales_file", document.getElementById("salesFile").value);
+      formData.append("inventory_file", document.getElementById("inventoryFile").value);
+      formData.append("social_file", document.getElementById("socialFile").value);
+      formData.append("web_file", document.getElementById("webFile").value);
+
+      try {
+        const response = await fetch("http://127.0.0.1:8000/phase2/build-unified", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await response.json();
+        box.textContent = JSON.stringify(data, null, 2);
+
+        if (data.unified_filename) {
+          document.getElementById("processedFilename").value = data.unified_filename;
+          document.getElementById("analysisSourceType").value = "unified";
+        }
+      } catch (error) {
+        box.textContent = "Error building unified dataset: " + error;
       }
     }
 
@@ -121,7 +200,7 @@
       const resultBox = document.getElementById("analysisResult");
 
       if (!processedFilename) {
-        resultBox.textContent = "Please enter a processed filename.";
+        resultBox.textContent = "Please enter a filename.";
         return;
       }
 
