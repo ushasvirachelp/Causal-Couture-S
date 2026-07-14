@@ -4,185 +4,391 @@
   <meta charset="UTF-8" />
   <title>Causal Couture</title>
   <style>
+    :root {
+      --bg: #f7f1eb;
+      --card: rgba(255, 251, 247, 0.92);
+      --card-2: #fff8f2;
+      --text: #2f241d;
+      --muted: #7f6a5c;
+      --line: #e6d7ca;
+      --accent: #8b5e3c;
+      --accent-dark: #6b4428;
+      --accent-soft: #d9b99b;
+      --shadow: 0 10px 30px rgba(107, 68, 40, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
     body {
-      font-family: Arial, sans-serif;
-      max-width: 1100px;
-      margin: 40px auto;
-      padding: 20px;
+      margin: 0;
+      font-family: "Georgia", "Times New Roman", serif;
+      background:
+        radial-gradient(circle at top left, #fff6ee 0%, transparent 30%),
+        radial-gradient(circle at bottom right, #f1e1d2 0%, transparent 28%),
+        var(--bg);
+      color: var(--text);
       line-height: 1.5;
     }
+
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 36px 20px 80px;
+    }
+
+    .hero {
+      padding: 34px 30px;
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      background: linear-gradient(135deg, rgba(255,250,245,0.98), rgba(246,236,226,0.96));
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+
+    .eyebrow {
+      font-size: 12px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    h1, h2, h3 {
+      margin-top: 0;
+      color: var(--text);
+    }
+
+    h1 {
+      font-size: 44px;
+      line-height: 1.05;
+      margin-bottom: 10px;
+    }
+
+    .hero p {
+      max-width: 760px;
+      color: var(--muted);
+      font-size: 17px;
+      margin-bottom: 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      align-items: start;
+    }
+
     .card {
-      border: 1px solid #ddd;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-      margin-bottom: 20px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 22px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(5px);
     }
+
+    .card.full {
+      grid-column: 1 / -1;
+    }
+
+    h2 {
+      font-size: 24px;
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      margin: 14px 0 8px;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    input[type="text"],
+    input[type="file"],
+    select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #fffdfb;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent-soft);
+      box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.08);
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
     button {
-      padding: 10px 16px;
       border: none;
-      border-radius: 8px;
+      border-radius: 999px;
+      padding: 12px 18px;
       cursor: pointer;
-      margin: 8px 8px 8px 0;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      transition: transform 0.15s ease, opacity 0.15s ease, background 0.2s ease;
     }
+
+    button:hover {
+      transform: translateY(-1px);
+      opacity: 0.95;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fffaf6;
+    }
+
+    .btn-secondary {
+      background: #efe0d3;
+      color: var(--accent-dark);
+    }
+
     pre {
-      background: #f7f7f7;
-      padding: 12px;
-      border-radius: 8px;
+      background: #fcf8f4;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
       overflow-x: auto;
       white-space: pre-wrap;
+      font-family: "SFMono-Regular", Menlo, monospace;
+      font-size: 12px;
+      color: #4b3a2d;
+      margin-top: 14px;
+      max-height: 320px;
+      overflow-y: auto;
     }
-    select, input[type="file"], input[type="text"] {
-      margin-bottom: 12px;
-      display: block;
-      width: 100%;
-      padding: 8px;
-      box-sizing: border-box;
-    }
+
     .score-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 12px;
-      margin-top: 12px;
+      margin-top: 16px;
     }
+
     .score-card {
-      border: 1px solid #e5e5e5;
-      border-radius: 10px;
-      padding: 14px;
-      background: #fafafa;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      background: linear-gradient(180deg, #fffdfb 0%, var(--card-2) 100%);
+      min-height: 110px;
     }
+
     .score-title {
-      font-size: 14px;
-      color: #555;
-      margin-bottom: 6px;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
     }
+
     .score-value {
-      font-size: 24px;
-      font-weight: bold;
+      font-size: 30px;
+      font-weight: 700;
+      color: var(--accent-dark);
     }
+
     .explanation-box {
       margin-top: 16px;
-      padding: 14px;
-      border-radius: 10px;
-      background: #f5f7fb;
-      border: 1px solid #dbe4f0;
+      padding: 18px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #fffdfb 0%, #f8efe7 100%);
+      border: 1px solid var(--line);
+      color: var(--text);
+    }
+
+    .section-note {
+      color: var(--muted);
+      margin-top: -6px;
+      margin-bottom: 14px;
+      font-size: 14px;
+    }
+
+    @media (max-width: 960px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      .score-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      h1 {
+        font-size: 34px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .score-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Causal Couture — Local Prototype</h1>
-    <p>Phase 1 upload, Phase 2 unified dataset build, and Phase 3 starter analysis + scorecard + explanation.</p>
-  </div>
+  <div class="container">
+    <section class="hero">
+      <div class="eyebrow">Causal Couture</div>
+      <h1>Luxury-style retail intelligence, built locally.</h1>
+      <p>
+        Upload raw source files, process them into analytical datasets, build a unified daily SKU view,
+        and generate early-stage demand, stock, engagement, and conversion signals with business-facing explanations.
+      </p>
+    </section>
 
-  <div class="card">
-    <h2>1) Upload + Process</h2>
-    <label for="sourceType">Source Type</label>
-    <select id="sourceType">
-      <option value="sales">sales</option>
-      <option value="inventory">inventory</option>
-      <option value="social">social</option>
-      <option value="web">web</option>
-    </select>
+    <div class="grid">
+      <section class="card">
+        <h2>1) Upload + Process</h2>
+        <p class="section-note">Validate and process sales, inventory, social, or web source files.</p>
 
-    <label for="fileInput">Choose CSV File</label>
-    <input type="file" id="fileInput" accept=".csv" />
-    <button onclick="uploadFile()">Upload + Process</button>
+        <label for="sourceType">Source Type</label>
+        <select id="sourceType">
+          <option value="sales">sales</option>
+          <option value="inventory">inventory</option>
+          <option value="social">social</option>
+          <option value="web">web</option>
+        </select>
 
-    <h3>Upload Result</h3>
-    <pre id="result">No file uploaded yet.</pre>
-  </div>
+        <label for="fileInput">Choose CSV File</label>
+        <input type="file" id="fileInput" accept=".csv" />
 
-  <div class="card">
-    <h2>2) View Processed Files</h2>
-    <button onclick="loadProcessedFiles()">Load Processed Files</button>
-    <pre id="processedFilesResult">No processed files loaded yet.</pre>
-  </div>
+        <div class="button-row">
+          <button class="btn-primary" onclick="uploadFile()">Upload + Process</button>
+        </div>
 
-  <div class="card">
-    <h2>3) Build Unified Dataset</h2>
+        <pre id="result">No file uploaded yet.</pre>
+      </section>
 
-    <label for="salesFile">Sales Processed Filename</label>
-    <input type="text" id="salesFile" />
+      <section class="card">
+        <h2>2) Processed Files</h2>
+        <p class="section-note">Load source-level and unified processed files into the interface.</p>
 
-    <label for="inventoryFile">Inventory Processed Filename</label>
-    <input type="text" id="inventoryFile" />
+        <div class="button-row">
+          <button class="btn-secondary" onclick="loadProcessedFiles()">Load Source Files</button>
+          <button class="btn-secondary" onclick="loadUnifiedFiles()">Load Unified Files</button>
+        </div>
 
-    <label for="socialFile">Social Processed Filename</label>
-    <input type="text" id="socialFile" />
+        <label for="salesFile">Sales Processed File</label>
+        <select id="salesFile"></select>
 
-    <label for="webFile">Web Processed Filename</label>
-    <input type="text" id="webFile" />
+        <label for="inventoryFile">Inventory Processed File</label>
+        <select id="inventoryFile"></select>
 
-    <button onclick="buildUnified()">Build Unified Dataset</button>
+        <label for="socialFile">Social Processed File</label>
+        <select id="socialFile"></select>
 
-    <h3>Unified Result</h3>
-    <pre id="unifiedResult">No unified dataset built yet.</pre>
-  </div>
+        <label for="webFile">Web Processed File</label>
+        <select id="webFile"></select>
 
-  <div class="card">
-    <h2>4) Run Starter Analysis</h2>
+        <label for="scorecardFilename">Unified File</label>
+        <select id="scorecardFilename"></select>
 
-    <label for="analysisSourceType">Source Type</label>
-    <select id="analysisSourceType">
-      <option value="sales">sales</option>
-      <option value="inventory">inventory</option>
-      <option value="social">social</option>
-      <option value="web">web</option>
-      <option value="unified">unified</option>
-    </select>
+        <pre id="processedFilesResult">No processed files loaded yet.</pre>
+      </section>
 
-    <label for="processedFilename">Processed Filename</label>
-    <input type="text" id="processedFilename" />
+      <section class="card full">
+        <h2>3) Build Unified Dataset</h2>
+        <p class="section-note">Merge processed source files into a single daily <code>date × sku_id</code> analytical dataset.</p>
 
-    <button onclick="runAnalysis()">Run Analysis</button>
+        <div class="button-row">
+          <button class="btn-primary" onclick="buildUnified()">Build Unified Dataset</button>
+        </div>
 
-    <h3>Analysis Result</h3>
-    <pre id="analysisResult">No analysis run yet.</pre>
-  </div>
+        <pre id="unifiedResult">No unified dataset built yet.</pre>
+      </section>
 
-  <div class="card">
-    <h2>5) Run Unified Scorecard + Explanation</h2>
+      <section class="card">
+        <h2>4) Starter Analysis</h2>
+        <p class="section-note">Run the starter analytical layer over a processed or unified file.</p>
 
-    <label for="scorecardFilename">Unified Filename</label>
-    <input type="text" id="scorecardFilename" />
+        <label for="analysisSourceType">Analysis Source Type</label>
+        <select id="analysisSourceType">
+          <option value="sales">sales</option>
+          <option value="inventory">inventory</option>
+          <option value="social">social</option>
+          <option value="web">web</option>
+          <option value="unified">unified</option>
+        </select>
 
-    <button onclick="runScorecard()">Run Unified Scorecard</button>
-    <button onclick="runExplanation()">Run Explanation</button>
+        <label for="processedFilename">Selected Filename</label>
+        <input type="text" id="processedFilename" />
 
-    <h3>Scorecard Result</h3>
-    <pre id="scorecardResult">No scorecard run yet.</pre>
+        <div class="button-row">
+          <button class="btn-secondary" onclick="runAnalysis()">Run Starter Analysis</button>
+        </div>
 
-    <div class="score-grid">
-      <div class="score-card">
-        <div class="score-title">Demand Pressure</div>
-        <div class="score-value" id="demandScore">-</div>
-      </div>
-      <div class="score-card">
-        <div class="score-title">Stock Risk</div>
-        <div class="score-value" id="stockScore">-</div>
-      </div>
-      <div class="score-card">
-        <div class="score-title">Engagement Momentum</div>
-        <div class="score-value" id="engagementScore">-</div>
-      </div>
-      <div class="score-card">
-        <div class="score-title">Conversion Strength</div>
-        <div class="score-value" id="conversionScore">-</div>
-      </div>
-      <div class="score-card">
-        <div class="score-title">Overall Signal</div>
-        <div class="score-value" id="overallScore">-</div>
-      </div>
-    </div>
+        <pre id="analysisResult">No analysis run yet.</pre>
+      </section>
 
-    <div class="explanation-box">
-      <strong>Business Explanation</strong>
-      <p id="businessExplanation">No explanation generated yet.</p>
+      <section class="card">
+        <h2>5) Unified Scorecard + Explanation</h2>
+        <p class="section-note">Generate starter decision signals and a plain-English explanation.</p>
+
+        <div class="button-row">
+          <button class="btn-primary" onclick="runScorecard()">Run Scorecard</button>
+          <button class="btn-secondary" onclick="runExplanation()">Run Explanation</button>
+        </div>
+
+        <pre id="scorecardResult">No scorecard run yet.</pre>
+
+        <div class="score-grid">
+          <div class="score-card">
+            <div class="score-title">Demand Pressure</div>
+            <div class="score-value" id="demandScore">-</div>
+          </div>
+          <div class="score-card">
+            <div class="score-title">Stock Risk</div>
+            <div class="score-value" id="stockScore">-</div>
+          </div>
+          <div class="score-card">
+            <div class="score-title">Engagement</div>
+            <div class="score-value" id="engagementScore">-</div>
+          </div>
+          <div class="score-card">
+            <div class="score-title">Conversion</div>
+            <div class="score-value" id="conversionScore">-</div>
+          </div>
+          <div class="score-card">
+            <div class="score-title">Overall Signal</div>
+            <div class="score-value" id="overallScore">-</div>
+          </div>
+        </div>
+
+        <div class="explanation-box">
+          <strong>Business Explanation</strong>
+          <p id="businessExplanation">No explanation generated yet.</p>
+        </div>
+      </section>
     </div>
   </div>
 
   <script>
+    function fillSelect(id, values) {
+      const select = document.getElementById(id);
+      const current = select.value;
+      select.innerHTML = '<option value="">Select a file</option>';
+      values.forEach(v => {
+        const option = document.createElement("option");
+        option.value = v;
+        option.textContent = v;
+        select.appendChild(option);
+      });
+      if (values.includes(current)) {
+        select.value = current;
+      }
+    }
+
     async function uploadFile() {
       const sourceType = document.getElementById("sourceType").value;
       const fileInput = document.getElementById("fileInput");
@@ -208,11 +414,7 @@
 
         if (data.processed_filename) {
           document.getElementById("processedFilename").value = data.processed_filename;
-
-          if (sourceType === "sales") document.getElementById("salesFile").value = data.processed_filename;
-          if (sourceType === "inventory") document.getElementById("inventoryFile").value = data.processed_filename;
-          if (sourceType === "social") document.getElementById("socialFile").value = data.processed_filename;
-          if (sourceType === "web") document.getElementById("webFile").value = data.processed_filename;
+          await loadProcessedFiles();
         }
       } catch (error) {
         resultBox.textContent = "Error connecting to API: " + error;
@@ -225,8 +427,26 @@
         const response = await fetch("http://127.0.0.1:8000/files/processed/by-source");
         const data = await response.json();
         box.textContent = JSON.stringify(data, null, 2);
+
+        fillSelect("salesFile", data.sales || []);
+        fillSelect("inventoryFile", data.inventory || []);
+        fillSelect("socialFile", data.social || []);
+        fillSelect("webFile", data.web || []);
       } catch (error) {
         box.textContent = "Error loading processed files: " + error;
+      }
+    }
+
+    async function loadUnifiedFiles() {
+      const box = document.getElementById("processedFilesResult");
+      try {
+        const response = await fetch("http://127.0.0.1:8000/files/unified");
+        const data = await response.json();
+        box.textContent = JSON.stringify(data, null, 2);
+
+        fillSelect("scorecardFilename", data.files || []);
+      } catch (error) {
+        box.textContent = "Error loading unified files: " + error;
       }
     }
 
@@ -251,6 +471,7 @@
         if (data.unified_filename) {
           document.getElementById("processedFilename").value = data.unified_filename;
           document.getElementById("analysisSourceType").value = "unified";
+          await loadUnifiedFiles();
           document.getElementById("scorecardFilename").value = data.unified_filename;
         }
       } catch (error) {
@@ -260,11 +481,17 @@
 
     async function runAnalysis() {
       const sourceType = document.getElementById("analysisSourceType").value;
-      const processedFilename = document.getElementById("processedFilename").value;
+      let processedFilename = document.getElementById("processedFilename").value;
+
+      if (!processedFilename && sourceType === "unified") {
+        processedFilename = document.getElementById("scorecardFilename").value;
+        document.getElementById("processedFilename").value = processedFilename;
+      }
+
       const resultBox = document.getElementById("analysisResult");
 
       if (!processedFilename) {
-        resultBox.textContent = "Please enter a filename.";
+        resultBox.textContent = "Please enter or select a filename.";
         return;
       }
 
@@ -284,7 +511,7 @@
       const resultBox = document.getElementById("scorecardResult");
 
       if (!processedFilename) {
-        resultBox.textContent = "Please enter a unified filename.";
+        resultBox.textContent = "Please select a unified filename.";
         return;
       }
 
@@ -310,7 +537,7 @@
       const explanationBox = document.getElementById("businessExplanation");
 
       if (!processedFilename) {
-        explanationBox.textContent = "Please enter a unified filename.";
+        explanationBox.textContent = "Please select a unified filename.";
         return;
       }
 

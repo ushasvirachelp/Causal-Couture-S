@@ -358,6 +358,12 @@ def list_processed_files_by_source() -> dict[str, Any]:
     return grouped
 
 
+@app.get("/files/unified")
+def list_unified_files() -> dict[str, Any]:
+    files = sorted([p.name for p in UNIFIED_DIR.glob("*.csv")], reverse=True)
+    return {"count": len(files), "files": files}
+
+
 @app.get("/phase2/summary")
 def phase2_summary(processed_filename: str) -> dict[str, Any]:
     file_path = PROCESSED_DIR / processed_filename
