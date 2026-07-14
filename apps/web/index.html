@@ -39,17 +39,44 @@
       padding: 8px;
       box-sizing: border-box;
     }
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .score-card {
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 14px;
+      background: #fafafa;
+    }
+    .score-title {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 6px;
+    }
+    .score-value {
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .explanation-box {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #f5f7fb;
+      border: 1px solid #dbe4f0;
+    }
   </style>
 </head>
 <body>
   <div class="card">
     <h1>Causal Couture — Local Prototype</h1>
-    <p>Phase 1 upload, Phase 2 unified dataset build, and Phase 3 starter analysis + scorecard.</p>
+    <p>Phase 1 upload, Phase 2 unified dataset build, and Phase 3 starter analysis + scorecard + explanation.</p>
   </div>
 
   <div class="card">
     <h2>1) Upload + Process</h2>
-
     <label for="sourceType">Source Type</label>
     <select id="sourceType">
       <option value="sales">sales</option>
@@ -60,7 +87,6 @@
 
     <label for="fileInput">Choose CSV File</label>
     <input type="file" id="fileInput" accept=".csv" />
-
     <button onclick="uploadFile()">Upload + Process</button>
 
     <h3>Upload Result</h3>
@@ -77,16 +103,16 @@
     <h2>3) Build Unified Dataset</h2>
 
     <label for="salesFile">Sales Processed Filename</label>
-    <input type="text" id="salesFile" placeholder="e.g. 20250714_171000_sales_processed.csv" />
+    <input type="text" id="salesFile" />
 
     <label for="inventoryFile">Inventory Processed Filename</label>
-    <input type="text" id="inventoryFile" placeholder="e.g. 20250714_171100_inventory_processed.csv" />
+    <input type="text" id="inventoryFile" />
 
     <label for="socialFile">Social Processed Filename</label>
-    <input type="text" id="socialFile" placeholder="e.g. 20250714_171200_social_processed.csv" />
+    <input type="text" id="socialFile" />
 
     <label for="webFile">Web Processed Filename</label>
-    <input type="text" id="webFile" placeholder="e.g. 20250714_171300_web_processed.csv" />
+    <input type="text" id="webFile" />
 
     <button onclick="buildUnified()">Build Unified Dataset</button>
 
@@ -107,7 +133,7 @@
     </select>
 
     <label for="processedFilename">Processed Filename</label>
-    <input type="text" id="processedFilename" placeholder="Paste processed or unified filename here" />
+    <input type="text" id="processedFilename" />
 
     <button onclick="runAnalysis()">Run Analysis</button>
 
@@ -116,15 +142,44 @@
   </div>
 
   <div class="card">
-    <h2>5) Run Unified Scorecard</h2>
+    <h2>5) Run Unified Scorecard + Explanation</h2>
 
     <label for="scorecardFilename">Unified Filename</label>
-    <input type="text" id="scorecardFilename" placeholder="Paste unified filename here" />
+    <input type="text" id="scorecardFilename" />
 
     <button onclick="runScorecard()">Run Unified Scorecard</button>
+    <button onclick="runExplanation()">Run Explanation</button>
 
     <h3>Scorecard Result</h3>
     <pre id="scorecardResult">No scorecard run yet.</pre>
+
+    <div class="score-grid">
+      <div class="score-card">
+        <div class="score-title">Demand Pressure</div>
+        <div class="score-value" id="demandScore">-</div>
+      </div>
+      <div class="score-card">
+        <div class="score-title">Stock Risk</div>
+        <div class="score-value" id="stockScore">-</div>
+      </div>
+      <div class="score-card">
+        <div class="score-title">Engagement Momentum</div>
+        <div class="score-value" id="engagementScore">-</div>
+      </div>
+      <div class="score-card">
+        <div class="score-title">Conversion Strength</div>
+        <div class="score-value" id="conversionScore">-</div>
+      </div>
+      <div class="score-card">
+        <div class="score-title">Overall Signal</div>
+        <div class="score-value" id="overallScore">-</div>
+      </div>
+    </div>
+
+    <div class="explanation-box">
+      <strong>Business Explanation</strong>
+      <p id="businessExplanation">No explanation generated yet.</p>
+    </div>
   </div>
 
   <script>
@@ -239,8 +294,43 @@
         );
         const data = await response.json();
         resultBox.textContent = JSON.stringify(data, null, 2);
+
+        document.getElementById("demandScore").textContent = data.demand_pressure_score ?? "-";
+        document.getElementById("stockScore").textContent = data.stock_risk_score ?? "-";
+        document.getElementById("engagementScore").textContent = data.engagement_momentum_score ?? "-";
+        document.getElementById("conversionScore").textContent = data.conversion_strength_score ?? "-";
+        document.getElementById("overallScore").textContent = data.overall_signal_score ?? "-";
       } catch (error) {
         resultBox.textContent = "Error running scorecard: " + error;
+      }
+    }
+
+    async function runExplanation() {
+      const processedFilename = document.getElementById("scorecardFilename").value;
+      const explanationBox = document.getElementById("businessExplanation");
+
+      if (!processedFilename) {
+        explanationBox.textContent = "Please enter a unified filename.";
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `http://127.0.0.1:8000/phase3/explain?processed_filename=${processedFilename}`
+        );
+        const data = await response.json();
+
+        if (data.scorecard) {
+          document.getElementById("demandScore").textContent = data.scorecard.demand_pressure_score ?? "-";
+          document.getElementById("stockScore").textContent = data.scorecard.stock_risk_score ?? "-";
+          document.getElementById("engagementScore").textContent = data.scorecard.engagement_momentum_score ?? "-";
+          document.getElementById("conversionScore").textContent = data.scorecard.conversion_strength_score ?? "-";
+          document.getElementById("overallScore").textContent = data.scorecard.overall_signal_score ?? "-";
+        }
+
+        explanationBox.textContent = data.explanation?.full_explanation || "No explanation returned.";
+      } catch (error) {
+        explanationBox.textContent = "Error running explanation: " + error;
       }
     }
   </script>

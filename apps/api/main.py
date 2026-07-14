@@ -229,7 +229,6 @@ def unified_scorecard(df: pd.DataFrame) -> dict[str, Any]:
     if "engagement_rate" in df.columns:
         avg_eng = pd.to_numeric(df["engagement_rate"], errors="coerce").fillna(0).mean()
         engagement_momentum = clamp_score(avg_eng * 10000)
-
     elif "engagement" in df.columns:
         avg_eng_raw = pd.to_numeric(df["engagement"], errors="coerce").fillna(0).mean()
         engagement_momentum = clamp_score(avg_eng_raw / 2)
@@ -237,7 +236,6 @@ def unified_scorecard(df: pd.DataFrame) -> dict[str, Any]:
     if "view_to_cart_rate" in df.columns:
         avg_conv = pd.to_numeric(df["view_to_cart_rate"], errors="coerce").fillna(0).mean()
         conversion_strength = clamp_score(avg_conv * 1000)
-
     elif {"add_to_cart", "product_views"}.issubset(df.columns):
         views = pd.to_numeric(df["product_views"], errors="coerce").fillna(0).sum()
         carts = pd.to_numeric(df["add_to_cart"], errors="coerce").fillna(0).sum()
@@ -267,6 +265,69 @@ def unified_scorecard(df: pd.DataFrame) -> dict[str, Any]:
         "overall_signal_score": overall_signal,
         "recommendation": recommendation,
         "note": "These are heuristic starter scores to support early-stage decision reasoning before full causal effect modeling."
+    }
+
+
+def build_explanation_from_scorecard(scorecard: dict[str, Any]) -> dict[str, Any]:
+    dp = scorecard["demand_pressure_score"]
+    sr = scorecard["stock_risk_score"]
+    em = scorecard["engagement_momentum_score"]
+    cs = scorecard["conversion_strength_score"]
+    overall = scorecard["overall_signal_score"]
+    recommendation = scorecard["recommendation"]
+
+    if dp >= 70:
+        demand_text = "Demand pressure appears strong."
+    elif dp >= 40:
+        demand_text = "Demand pressure appears moderate."
+    else:
+        demand_text = "Demand pressure appears limited."
+
+    if sr >= 70:
+        stock_text = "Stock risk looks elevated and may need attention."
+    elif sr >= 40:
+        stock_text = "Stock risk is moderate and should be monitored."
+    else:
+        stock_text = "Stock risk currently appears low."
+
+    if em >= 70:
+        engagement_text = "Engagement momentum is strong."
+    elif em >= 40:
+        engagement_text = "Engagement momentum is moderate."
+    else:
+        engagement_text = "Engagement momentum is currently weak."
+
+    if cs >= 70:
+        conversion_text = "Conversion strength looks healthy."
+    elif cs >= 40:
+        conversion_text = "Conversion strength is moderate."
+    else:
+        conversion_text = "Conversion strength appears weak."
+
+    if overall >= 70:
+        summary = "Overall, the product signal looks strong across combined business inputs."
+    elif overall >= 45:
+        summary = "Overall, the product signal is mixed but worth continued monitoring."
+    else:
+        summary = "Overall, the current combined signal looks weak."
+
+    explanation = " ".join([
+        summary,
+        demand_text,
+        stock_text,
+        engagement_text,
+        conversion_text,
+        recommendation
+    ])
+
+    return {
+        "summary": summary,
+        "demand_interpretation": demand_text,
+        "stock_interpretation": stock_text,
+        "engagement_interpretation": engagement_text,
+        "conversion_interpretation": conversion_text,
+        "recommendation": recommendation,
+        "full_explanation": explanation
     }
 
 
@@ -380,6 +441,22 @@ def phase3_scorecard(processed_filename: str) -> dict[str, Any]:
 
     df = pd.read_csv(file_path)
     return unified_scorecard(df)
+
+
+@app.get("/phase3/explain")
+def phase3_explain(processed_filename: str) -> dict[str, Any]:
+    file_path = UNIFIED_DIR / processed_filename
+    if not file_path.exists():
+        return {"error": f"Unified file not found: {processed_filename}"}
+
+    df = pd.read_csv(file_path)
+    scorecard = unified_scorecard(df)
+    explanation = build_explanation_from_scorecard(scorecard)
+
+    return {
+        "scorecard": scorecard,
+        "explanation": explanation
+    }
 
 
 @app.get("/phase3/analyze")
