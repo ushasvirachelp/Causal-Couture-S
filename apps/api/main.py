@@ -199,6 +199,34 @@ def health_check() -> dict[str, str]:
     return {"status": "ok"}
 
 
+@app.get("/files/processed")
+def list_processed_files() -> dict[str, Any]:
+    files = sorted([p.name for p in PROCESSED_DIR.glob("*.csv")], reverse=True)
+    return {
+        "count": len(files),
+        "files": files
+    }
+
+
+@app.get("/phase2/summary")
+def phase2_summary(processed_filename: str) -> dict[str, Any]:
+    file_path = PROCESSED_DIR / processed_filename
+    if not file_path.exists():
+        return {"error": f"Processed file not found: {processed_filename}"}
+
+    df = pd.read_csv(file_path)
+
+    summary = {
+        "rows": int(df.shape[0]),
+        "columns": list(df.columns),
+        "unique_skus": int(df["sku_id"].nunique()) if "sku_id" in df.columns else 0,
+        "date_min": str(df["date"].min()) if "date" in df.columns and len(df) else None,
+        "date_max": str(df["date"].max()) if "date" in df.columns and len(df) else None,
+        "preview_rows": df.head(5).fillna("").to_dict(orient="records")
+    }
+    return summary
+
+
 @app.post("/upload")
 async def upload_file(
     source_type: str = Form(...),
@@ -242,6 +270,7 @@ async def upload_file(
             "summary": validation["summary"],
             "saved_raw_file": str(raw_path),
             "saved_processed_file": str(processed_path),
+            "processed_filename": processed_filename,
             "preview_rows": featured_df.head(5).fillna("").to_dict(orient="records")
         }
 
