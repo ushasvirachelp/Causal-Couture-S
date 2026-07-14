@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 from io import BytesIO
 from datetime import datetime
 
@@ -21,9 +21,11 @@ BASE_DIR = Path(__file__).resolve().parents[2]
 SCHEMA_PATH = BASE_DIR / "packages" / "shared" / "schemas.json"
 RAW_DIR = BASE_DIR / "data" / "raw"
 PROCESSED_DIR = BASE_DIR / "data" / "processed"
+UNIFIED_DIR = PROCESSED_DIR / "unified"
 
 RAW_DIR.mkdir(parents=True, exist_ok=True)
 PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+UNIFIED_DIR.mkdir(parents=True, exist_ok=True)
 
 with open(SCHEMA_PATH, "r") as f:
     SCHEMAS = json.load(f)
@@ -191,7 +193,28 @@ def simple_causal_stub(source_type: str, df: pd.DataFrame) -> dict[str, Any]:
             "note": "This is a Phase 3 starter placeholder, not full causal effect estimation yet."
         }
 
+    if source_type == "unified":
+        cols = set(df.columns)
+        return {
+            "phase_3_status": "starter_scaffold",
+            "analysis_type": "multi_signal_unified_stub",
+            "likely_signal": "joined business signals available for downstream causal reasoning",
+            "has_sales": "units_sold" in cols,
+            "has_inventory": "closing_stock" in cols,
+            "has_social": "engagement" in cols,
+            "has_web": "product_views" in cols,
+            "row_count": int(len(df)),
+            "note": "This unified dataset is the bridge into later causal modeling."
+        }
+
     return {"message": "No stub analysis available."}
+
+
+def read_processed_csv(filename: str) -> pd.DataFrame:
+    file_path = PROCESSED_DIR / filename
+    if not file_path.exists():
+        raise FileNotFoundError(f"Processed file not found: {filename}")
+    return pd.read_csv(file_path)
 
 
 @app.get("/health")
@@ -202,10 +225,23 @@ def health_check() -> dict[str, str]:
 @app.get("/files/processed")
 def list_processed_files() -> dict[str, Any]:
     files = sorted([p.name for p in PROCESSED_DIR.glob("*.csv")], reverse=True)
-    return {
-        "count": len(files),
-        "files": files
-    }
+    return {"count": len(files), "files": files}
+
+
+@app.get("/files/processed/by-source")
+def list_processed_files_by_source() -> dict[str, Any]:
+    grouped = {"sales": [], "inventory": [], "social": [], "web": [], "other": []}
+    for p in sorted(PROCESSED_DIR.glob("*.csv"), reverse=True):
+        name = p.name
+        matched = False
+        for source in ["sales", "inventory", "social", "web"]:
+            if f"_{source}_" in name:
+                grouped[source].append(name)
+                matched = True
+                break
+        if not matched:
+            grouped["other"].append(name)
+    return grouped
 
 
 @app.get("/phase2/summary")
@@ -225,6 +261,78 @@ def phase2_summary(processed_filename: str) -> dict[str, Any]:
         "preview_rows": df.head(5).fillna("").to_dict(orient="records")
     }
     return summary
+
+
+@app.post("/phase2/build-unified")
+def build_unified_dataset(
+    sales_file: Optional[str] = Form(None),
+    inventory_file: Optional[str] = Form(None),
+    social_file: Optional[str] = Form(None),
+    web_file: Optional[str] = Form(None)
+) -> dict[str, Any]:
+    sources = {
+        "sales": sales_file,
+        "inventory": inventory_file,
+        "social": social_file,
+        "web": web_file,
+    }
+
+    loaded = {}
+    for source, filename in sources.items():
+        if filename:
+            df = read_processed_csv(filename).copy()
+            df.columns = [c.strip().lower() for c in df.columns]
+            if "date" in df.columns:
+                df["date"] = pd.to_datetime(df["date"], errors="coerce")
+            if "sku_id" in df.columns:
+                df["sku_id"] = df["sku_id"].astype(str).str.strip().str.upper()
+            loaded[source] = df
+
+    if not loaded:
+        return {"error": "Provide at least one processed file."}
+
+    unified = None
+    for source, df in loaded.items():
+        if "date" not in df.columns or "sku_id" not in df.columns:
+            return {"error": f"{source} file is missing date or sku_id columns."}
+
+        if unified is None:
+            unified = df
+        else:
+            overlapping = [c for c in df.columns if c in unified.columns and c not in ["date", "sku_id"]]
+            rename_map = {c: f"{c}_{source}" for c in overlapping}
+            df = df.rename(columns=rename_map)
+            unified = unified.merge(df, on=["date", "sku_id"], how="outer")
+
+    unified = unified.sort_values(["date", "sku_id"]).reset_index(drop=True)
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    unified_filename = f"{timestamp}_unified_daily_sku.csv"
+    unified_path = UNIFIED_DIR / unified_filename
+    unified.to_csv(unified_path, index=False)
+
+    return {
+        "status": "success",
+        "unified_filename": unified_filename,
+        "saved_unified_file": str(unified_path),
+        "rows": int(unified.shape[0]),
+        "columns": list(unified.columns),
+        "preview_rows": unified.head(5).fillna("").to_dict(orient="records")
+    }
+
+
+@app.get("/phase3/analyze")
+def phase3_analyze(source_type: str, processed_filename: str) -> dict[str, Any]:
+    if source_type == "unified":
+        file_path = UNIFIED_DIR / processed_filename
+    else:
+        file_path = PROCESSED_DIR / processed_filename
+
+    if not file_path.exists():
+        return {"error": f"Processed file not found: {processed_filename}"}
+
+    df = pd.read_csv(file_path)
+    return simple_causal_stub(source_type, df)
 
 
 @app.post("/upload")
@@ -280,13 +388,3 @@ async def upload_file(
             "errors": [f"Failed to process file: {str(e)}"],
             "summary": {}
         }
-
-
-@app.get("/phase3/analyze")
-def phase3_analyze(source_type: str, processed_filename: str) -> dict[str, Any]:
-    file_path = PROCESSED_DIR / processed_filename
-    if not file_path.exists():
-        return {"error": f"Processed file not found: {processed_filename}"}
-
-    df = pd.read_csv(file_path)
-    return simple_causal_stub(source_type, df)
