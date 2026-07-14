@@ -5,28 +5,37 @@
   <title>Causal Couture</title>
   <style>
     :root {
-      --bg: #f7f1eb;
-      --card: rgba(255, 251, 247, 0.92);
-      --card-2: #fff8f2;
-      --text: #2f241d;
-      --muted: #7f6a5c;
-      --line: #e6d7ca;
-      --accent: #8b5e3c;
-      --accent-dark: #6b4428;
-      --accent-soft: #d9b99b;
-      --shadow: 0 10px 30px rgba(107, 68, 40, 0.08);
+      --bg1: #fff0f8;
+      --bg2: #ffd9ef;
+      --bg3: #f7c8ff;
+      --card: rgba(255, 249, 253, 0.88);
+      --card-strong: rgba(255, 244, 251, 0.96);
+      --line: rgba(255, 145, 201, 0.35);
+      --text: #5b2450;
+      --muted: #9a5e8b;
+      --hot-pink: #ff4fa3;
+      --barbie-pink: #ff78b8;
+      --bubblegum: #ff9fd2;
+      --lilac: #c78cff;
+      --lavender: #e7c6ff;
+      --white-glow: rgba(255,255,255,0.9);
+      --shadow: 0 12px 30px rgba(255, 105, 180, 0.16);
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
-      font-family: "Georgia", "Times New Roman", serif;
-      background:
-        radial-gradient(circle at top left, #fff6ee 0%, transparent 30%),
-        radial-gradient(circle at bottom right, #f1e1d2 0%, transparent 28%),
-        var(--bg);
+      font-family: "Trebuchet MS", "Avenir Next", "Segoe UI", sans-serif;
       color: var(--text);
+      background:
+        radial-gradient(circle at 15% 20%, rgba(255,255,255,0.7) 0 6%, transparent 7%),
+        radial-gradient(circle at 80% 18%, rgba(255,255,255,0.55) 0 5%, transparent 6%),
+        radial-gradient(circle at 20% 80%, rgba(255,255,255,0.5) 0 4%, transparent 5%),
+        linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 35%, var(--bg3) 68%, #ffe5f5 100%);
+      min-height: 100vh;
       line-height: 1.5;
     }
 
@@ -37,12 +46,38 @@
     }
 
     .hero {
+      position: relative;
+      overflow: hidden;
       padding: 34px 30px;
-      border: 1px solid var(--line);
-      border-radius: 26px;
-      background: linear-gradient(135deg, rgba(255,250,245,0.98), rgba(246,236,226,0.96));
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,0.65);
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255, 231, 247, 0.9)),
+        linear-gradient(135deg, rgba(255,120,184,0.16), rgba(199,140,255,0.16));
       box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
       margin-bottom: 24px;
+    }
+
+    .hero::before,
+    .hero::after {
+      content: "✦";
+      position: absolute;
+      color: rgba(255,255,255,0.9);
+      text-shadow: 0 0 16px rgba(255,255,255,0.95);
+      font-size: 28px;
+      pointer-events: none;
+    }
+
+    .hero::before {
+      top: 18px;
+      right: 24px;
+    }
+
+    .hero::after {
+      bottom: 18px;
+      left: 24px;
+      font-size: 22px;
     }
 
     .eyebrow {
@@ -50,25 +85,31 @@
       letter-spacing: 0.22em;
       text-transform: uppercase;
       color: var(--muted);
-      margin-bottom: 12px;
+      margin-bottom: 10px;
+      font-weight: 700;
     }
 
     h1, h2, h3 {
       margin-top: 0;
-      color: var(--text);
     }
 
     h1 {
+      margin-bottom: 10px;
       font-size: 44px;
       line-height: 1.05;
-      margin-bottom: 10px;
+      color: var(--hot-pink);
+      text-shadow: 0 1px 0 rgba(255,255,255,0.7);
     }
 
-    .hero p {
-      max-width: 760px;
+    h2 {
+      font-size: 24px;
+      color: #c13787;
+      margin-bottom: 8px;
+    }
+
+    .hero p,
+    .section-note {
       color: var(--muted);
-      font-size: 17px;
-      margin-bottom: 0;
     }
 
     .grid {
@@ -79,27 +120,24 @@
     }
 
     .card {
-      border: 1px solid var(--line);
-      border-radius: 22px;
+      border-radius: 24px;
       padding: 22px;
-      background: var(--card);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,244,251,0.94));
+      border: 1px solid rgba(255,255,255,0.7);
       box-shadow: var(--shadow);
-      backdrop-filter: blur(5px);
+      backdrop-filter: blur(10px);
     }
 
     .card.full {
       grid-column: 1 / -1;
     }
 
-    h2 {
-      font-size: 24px;
-      margin-bottom: 14px;
-    }
-
     label {
       display: block;
       margin: 14px 0 8px;
-      font-size: 13px;
+      font-size: 12px;
+      font-weight: 700;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--muted);
@@ -110,18 +148,21 @@
     select {
       width: 100%;
       padding: 12px 14px;
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      background: #fffdfb;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 120, 184, 0.28);
+      background: rgba(255,255,255,0.85);
       color: var(--text);
       font-size: 14px;
       outline: none;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
     }
 
     input:focus,
     select:focus {
-      border-color: var(--accent-soft);
-      box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.08);
+      border-color: var(--barbie-pink);
+      box-shadow:
+        0 0 0 4px rgba(255, 120, 184, 0.12),
+        0 8px 18px rgba(255, 120, 184, 0.08);
     }
 
     .button-row {
@@ -137,36 +178,39 @@
       padding: 12px 18px;
       cursor: pointer;
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 700;
       letter-spacing: 0.02em;
-      transition: transform 0.15s ease, opacity 0.15s ease, background 0.2s ease;
+      transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s ease;
     }
 
     button:hover {
-      transform: translateY(-1px);
-      opacity: 0.95;
+      transform: translateY(-1px) scale(1.01);
+      opacity: 0.98;
     }
 
     .btn-primary {
-      background: var(--accent);
-      color: #fffaf6;
+      color: white;
+      background: linear-gradient(135deg, var(--hot-pink), var(--barbie-pink), var(--lilac));
+      box-shadow: 0 10px 20px rgba(255, 79, 163, 0.22);
     }
 
     .btn-secondary {
-      background: #efe0d3;
-      color: var(--accent-dark);
+      color: #a02d73;
+      background: linear-gradient(135deg, #fff6fb, #ffe5f5, #f5ddff);
+      border: 1px solid rgba(255, 120, 184, 0.22);
+      box-shadow: 0 8px 16px rgba(255, 120, 184, 0.08);
     }
 
     pre {
-      background: #fcf8f4;
-      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.7);
+      border: 1px solid rgba(255, 145, 201, 0.22);
       border-radius: 18px;
       padding: 16px;
       overflow-x: auto;
       white-space: pre-wrap;
       font-family: "SFMono-Regular", Menlo, monospace;
       font-size: 12px;
-      color: #4b3a2d;
+      color: #6c3c60;
       margin-top: 14px;
       max-height: 320px;
       overflow-y: auto;
@@ -180,11 +224,13 @@
     }
 
     .score-card {
-      border: 1px solid var(--line);
-      border-radius: 18px;
+      border-radius: 20px;
       padding: 16px;
-      background: linear-gradient(180deg, #fffdfb 0%, var(--card-2) 100%);
       min-height: 110px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.88), rgba(255,239,249,0.95));
+      border: 1px solid rgba(255, 145, 201, 0.24);
+      box-shadow: 0 10px 18px rgba(255, 120, 184, 0.08);
     }
 
     .score-title {
@@ -193,37 +239,48 @@
       text-transform: uppercase;
       color: var(--muted);
       margin-bottom: 12px;
+      font-weight: 700;
     }
 
     .score-value {
       font-size: 30px;
-      font-weight: 700;
-      color: var(--accent-dark);
+      font-weight: 800;
+      color: var(--hot-pink);
+      text-shadow: 0 1px 0 rgba(255,255,255,0.7);
     }
 
     .explanation-box {
       margin-top: 16px;
       padding: 18px;
-      border-radius: 18px;
-      background: linear-gradient(180deg, #fffdfb 0%, #f8efe7 100%);
-      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.82), rgba(255,235,246,0.95));
+      border: 1px solid rgba(255, 145, 201, 0.25);
       color: var(--text);
+      box-shadow: 0 10px 18px rgba(255, 120, 184, 0.08);
     }
 
     .section-note {
-      color: var(--muted);
-      margin-top: -6px;
+      margin-top: -4px;
       margin-bottom: 14px;
       font-size: 14px;
+    }
+
+    code {
+      background: rgba(255,255,255,0.65);
+      padding: 2px 8px;
+      border-radius: 999px;
+      color: #b13d84;
     }
 
     @media (max-width: 960px) {
       .grid {
         grid-template-columns: 1fr;
       }
+
       .score-grid {
         grid-template-columns: repeat(2, 1fr);
       }
+
       h1 {
         font-size: 34px;
       }
@@ -239,8 +296,8 @@
 <body>
   <div class="container">
     <section class="hero">
-      <div class="eyebrow">Causal Couture</div>
-      <h1>Luxury-style retail intelligence, built locally.</h1>
+      <div class="eyebrow">Barbie Fashion Fairytale Inspired Prototype</div>
+      <h1>Causal Couture</h1>
       <p>
         Upload raw source files, process them into analytical datasets, build a unified daily SKU view,
         and generate early-stage demand, stock, engagement, and conversion signals with business-facing explanations.
