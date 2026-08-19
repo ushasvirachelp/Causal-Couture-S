@@ -6,6 +6,10 @@ from pathlib import Path
 from typing import Any, Optional
 from io import BytesIO
 from datetime import datetime
+from scenario import run_scenario
+from trends import build_trend_summary
+from dashboard import build_dashboard
+from analytics import build_scorecard
 
 app = FastAPI(title="Causal Couture API")
 
@@ -208,87 +212,38 @@ def read_processed_csv(filename: str) -> pd.DataFrame:
     return pd.read_csv(file_path)
 
 
-def clamp_score(value: float) -> float:
-    return max(0.0, min(100.0, round(value, 2)))
-
-
-def unified_scorecard(df: pd.DataFrame) -> dict[str, Any]:
-    demand_pressure = 0.0
-    stock_risk = 0.0
-    engagement_momentum = 0.0
-    conversion_strength = 0.0
-
-    if "units_sold" in df.columns:
-        avg_units = pd.to_numeric(df["units_sold"], errors="coerce").fillna(0).mean()
-        demand_pressure = clamp_score(avg_units * 10)
-
-    if "closing_stock" in df.columns:
-        avg_stock = pd.to_numeric(df["closing_stock"], errors="coerce").fillna(0).mean()
-        stock_risk = clamp_score(100 - (avg_stock * 8))
-
-    if "engagement_rate" in df.columns:
-        avg_eng = pd.to_numeric(df["engagement_rate"], errors="coerce").fillna(0).mean()
-        engagement_momentum = clamp_score(avg_eng * 10000)
-    elif "engagement" in df.columns:
-        avg_eng_raw = pd.to_numeric(df["engagement"], errors="coerce").fillna(0).mean()
-        engagement_momentum = clamp_score(avg_eng_raw / 2)
-
-    if "view_to_cart_rate" in df.columns:
-        avg_conv = pd.to_numeric(df["view_to_cart_rate"], errors="coerce").fillna(0).mean()
-        conversion_strength = clamp_score(avg_conv * 1000)
-    elif {"add_to_cart", "product_views"}.issubset(df.columns):
-        views = pd.to_numeric(df["product_views"], errors="coerce").fillna(0).sum()
-        carts = pd.to_numeric(df["add_to_cart"], errors="coerce").fillna(0).sum()
-        conversion_strength = clamp_score((carts / views) * 1000) if views > 0 else 0
-
-    overall_signal = clamp_score(
-        (0.35 * demand_pressure) +
-        (0.25 * (100 - stock_risk)) +
-        (0.20 * engagement_momentum) +
-        (0.20 * conversion_strength)
-    )
-
-    if overall_signal >= 70:
-        recommendation = "High momentum — monitor closely and consider inventory prioritization."
-    elif overall_signal >= 45:
-        recommendation = "Moderate signal — continue tracking and validate across more days."
-    else:
-        recommendation = "Weak signal — avoid overcommitting inventory until stronger evidence appears."
-
-    return {
-        "phase_3_status": "starter_scaffold_plus_scorecard",
-        "analysis_type": "unified_signal_scorecard",
-        "demand_pressure_score": demand_pressure,
-        "stock_risk_score": stock_risk,
-        "engagement_momentum_score": engagement_momentum,
-        "conversion_strength_score": conversion_strength,
-        "overall_signal_score": overall_signal,
-        "recommendation": recommendation,
-        "note": "These are heuristic starter scores to support early-stage decision reasoning before full causal effect modeling."
-    }
-
-
 def build_explanation_from_scorecard(scorecard: dict[str, Any]) -> dict[str, Any]:
+    """
+    Convert the structured heuristic scorecard into business-facing language.
+    """
     dp = scorecard["demand_pressure_score"]
     sr = scorecard["stock_risk_score"]
     em = scorecard["engagement_momentum_score"]
     cs = scorecard["conversion_strength_score"]
     overall = scorecard["overall_signal_score"]
-    recommendation = scorecard["recommendation"]
+
+    recommendation = scorecard.get("recommendation", {})
+    action = recommendation.get("action", "HOLD")
+    priority = recommendation.get("priority", "LOW")
+    confidence = recommendation.get("confidence", "MEDIUM")
+    reason = recommendation.get(
+        "reason",
+        "Current signals do not indicate an immediate change."
+    )
 
     if dp >= 70:
-        demand_text = "Demand pressure appears strong."
+        demand_text = "Demand pressure is strong."
     elif dp >= 40:
-        demand_text = "Demand pressure appears moderate."
+        demand_text = "Demand pressure is moderate."
     else:
-        demand_text = "Demand pressure appears limited."
+        demand_text = "Demand pressure is limited."
 
     if sr >= 70:
-        stock_text = "Stock risk looks elevated and may need attention."
+        stock_text = "Inventory risk is elevated and needs attention."
     elif sr >= 40:
-        stock_text = "Stock risk is moderate and should be monitored."
+        stock_text = "Inventory risk is moderate and should be monitored."
     else:
-        stock_text = "Stock risk currently appears low."
+        stock_text = "Inventory risk is currently low."
 
     if em >= 70:
         engagement_text = "Engagement momentum is strong."
@@ -298,26 +253,31 @@ def build_explanation_from_scorecard(scorecard: dict[str, Any]) -> dict[str, Any
         engagement_text = "Engagement momentum is currently weak."
 
     if cs >= 70:
-        conversion_text = "Conversion strength looks healthy."
+        conversion_text = "Conversion strength is healthy."
     elif cs >= 40:
         conversion_text = "Conversion strength is moderate."
     else:
-        conversion_text = "Conversion strength appears weak."
+        conversion_text = "Conversion strength is weak."
 
     if overall >= 70:
-        summary = "Overall, the product signal looks strong across combined business inputs."
+        summary = "Overall, the combined business signal is strong."
     elif overall >= 45:
-        summary = "Overall, the product signal is mixed but worth continued monitoring."
+        summary = "Overall, the combined business signal is mixed but worth monitoring."
     else:
-        summary = "Overall, the current combined signal looks weak."
+        summary = "Overall, the current combined business signal is weak."
 
-    explanation = " ".join([
+    action_text = (
+        f"Recommended action: {action}. Priority: {priority}. "
+        f"Confidence: {confidence}. {reason}"
+    )
+
+    full_explanation = " ".join([
         summary,
         demand_text,
         stock_text,
         engagement_text,
         conversion_text,
-        recommendation
+        action_text,
     ])
 
     return {
@@ -326,8 +286,11 @@ def build_explanation_from_scorecard(scorecard: dict[str, Any]) -> dict[str, Any
         "stock_interpretation": stock_text,
         "engagement_interpretation": engagement_text,
         "conversion_interpretation": conversion_text,
-        "recommendation": recommendation,
-        "full_explanation": explanation
+        "action": action,
+        "priority": priority,
+        "confidence": confidence,
+        "reason": reason,
+        "full_explanation": full_explanation,
     }
 
 
@@ -446,7 +409,7 @@ def phase3_scorecard(processed_filename: str) -> dict[str, Any]:
         return {"error": f"Unified file not found: {processed_filename}"}
 
     df = pd.read_csv(file_path)
-    return unified_scorecard(df)
+    return build_scorecard(df)
 
 
 @app.get("/phase3/explain")
@@ -456,7 +419,7 @@ def phase3_explain(processed_filename: str) -> dict[str, Any]:
         return {"error": f"Unified file not found: {processed_filename}"}
 
     df = pd.read_csv(file_path)
-    scorecard = unified_scorecard(df)
+    scorecard = build_scorecard(df)
     explanation = build_explanation_from_scorecard(scorecard)
 
     return {
@@ -477,6 +440,47 @@ def phase3_analyze(source_type: str, processed_filename: str) -> dict[str, Any]:
 
     df = pd.read_csv(file_path)
     return simple_causal_stub(source_type, df)
+
+
+@app.post("/phase4/scenario")
+def phase4_scenario(
+    processed_filename: str = Form(...),
+    demand_change_pct: float = Form(0),
+    inventory_change_pct: float = Form(0),
+    engagement_change_pct: float = Form(0),
+    conversion_change_pct: float = Form(0),
+) -> dict[str, Any]:
+    file_path = UNIFIED_DIR / processed_filename
+
+    if not file_path.exists():
+        return {
+            "error": f"Unified file not found: {processed_filename}"
+        }
+
+    try:
+        df = pd.read_csv(file_path)
+
+        result = run_scenario(
+            df=df,
+            demand_change_pct=demand_change_pct,
+            inventory_change_pct=inventory_change_pct,
+            engagement_change_pct=engagement_change_pct,
+            conversion_change_pct=conversion_change_pct,
+        )
+
+        result["processed_filename"] = processed_filename
+
+        return result
+
+    except ValueError as e:
+        return {
+            "error": str(e)
+        }
+
+    except Exception as e:
+        return {
+            "error": f"Scenario analysis failed: {str(e)}"
+        }
 
 
 @app.post("/upload")
@@ -531,4 +535,159 @@ async def upload_file(
             "valid": False,
             "errors": [f"Failed to process file: {str(e)}"],
             "summary": {}
+        }
+
+@app.get("/phase4/trends")
+def phase4_trends(
+    processed_filename: str,
+) -> dict[str, Any]:
+
+    file_path = UNIFIED_DIR / processed_filename
+
+    if not file_path.exists():
+        return {
+            "error": f"Unified file not found: {processed_filename}"
+        }
+
+    try:
+        df = pd.read_csv(file_path)
+
+        result = build_trend_summary(df)
+
+        result["processed_filename"] = processed_filename
+
+        return result
+
+    except ValueError as e:
+        return {
+            "error": str(e)
+        }
+
+    except Exception as e:
+        return {
+            "error": f"Trend analysis failed: {str(e)}"
+        }
+@app.get("/phase4/dashboard")
+def phase4_dashboard(
+    processed_filename: str,
+) -> dict[str, Any]:
+
+    file_path = UNIFIED_DIR / processed_filename
+
+    if not file_path.exists():
+        return {
+            "error": f"Unified file not found: {processed_filename}"
+        }
+
+    try:
+        df = pd.read_csv(file_path)
+
+        result = build_dashboard(df)
+
+        result["processed_filename"] = processed_filename
+
+        return result
+
+    except ValueError as e:
+        return {
+            "error": str(e)
+        }
+
+    except Exception as e:
+        return {
+            "error": f"Dashboard generation failed: {str(e)}"
+        }
+@app.post("/phase4/intelligence")
+def phase4_intelligence(
+    processed_filename: str = Form(...),
+    demand_change_pct: float = Form(0),
+    inventory_change_pct: float = Form(0),
+    engagement_change_pct: float = Form(0),
+    conversion_change_pct: float = Form(0),
+) -> dict[str, Any]:
+    file_path = UNIFIED_DIR / processed_filename
+
+    if not file_path.exists():
+        return {
+            "error": f"Unified file not found: {processed_filename}"
+        }
+
+    try:
+        df = pd.read_csv(file_path)
+
+        dashboard_result = build_dashboard(df)
+
+        scenario_result = run_scenario(
+            df=df,
+            demand_change_pct=demand_change_pct,
+            inventory_change_pct=inventory_change_pct,
+            engagement_change_pct=engagement_change_pct,
+            conversion_change_pct=conversion_change_pct,
+        )
+
+        return {
+            "processed_filename": processed_filename,
+            "dashboard": dashboard_result,
+            "scenario": scenario_result,
+            "methodology_note": (
+                "Dashboard metrics are heuristic/descriptive signals. "
+                "Scenario outputs are structured simulations, not causal estimates."
+            ),
+        }
+
+    except ValueError as e:
+        return {
+            "error": str(e)
+        }
+
+    except Exception as e:
+        return {
+            "error": f"Intelligence generation failed: {str(e)}"
+        }
+@app.post("/phase4/intelligence")
+def phase4_intelligence(
+    processed_filename: str = Form(...),
+    demand_change_pct: float = Form(0),
+    inventory_change_pct: float = Form(0),
+    engagement_change_pct: float = Form(0),
+    conversion_change_pct: float = Form(0),
+) -> dict[str, Any]:
+    file_path = UNIFIED_DIR / processed_filename
+
+    if not file_path.exists():
+        return {
+            "error": f"Unified file not found: {processed_filename}"
+        }
+
+    try:
+        df = pd.read_csv(file_path)
+
+        dashboard_result = build_dashboard(df)
+
+        scenario_result = run_scenario(
+            df=df,
+            demand_change_pct=demand_change_pct,
+            inventory_change_pct=inventory_change_pct,
+            engagement_change_pct=engagement_change_pct,
+            conversion_change_pct=conversion_change_pct,
+        )
+
+        return {
+            "processed_filename": processed_filename,
+            "dashboard": dashboard_result,
+            "scenario": scenario_result,
+            "methodology_note": (
+                "Dashboard metrics are heuristic/descriptive signals. "
+                "Scenario outputs are structured simulations, not causal estimates."
+            ),
+        }
+
+    except ValueError as e:
+        return {
+            "error": str(e)
+        }
+
+    except Exception as e:
+        return {
+            "error": f"Intelligence generation failed: {str(e)}"
         }

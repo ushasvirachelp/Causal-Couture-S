@@ -1,0 +1,4 @@
+date,sku_id,units_sold,revenue,rolling_units_sold_3d,sales_spike_flag
+2025-07-01,SKU001,5,250,5.0,0
+2025-07-02,SKU002,3,180,3.0,0
+2025-07-03,SKU003,8,400,8.0,0

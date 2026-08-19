@@ -2,513 +2,1262 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Causal Couture</title>
+
   <style>
     :root {
-      --bg1: #fff0f8;
-      --bg2: #ffd9ef;
-      --bg3: #f7c8ff;
-      --card: rgba(255, 249, 253, 0.88);
-      --card-strong: rgba(255, 244, 251, 0.96);
-      --line: rgba(255, 145, 201, 0.35);
-      --text: #5b2450;
-      --muted: #9a5e8b;
-      --hot-pink: #ff4fa3;
-      --barbie-pink: #ff78b8;
-      --bubblegum: #ff9fd2;
-      --lilac: #c78cff;
-      --lavender: #e7c6ff;
-      --white-glow: rgba(255,255,255,0.9);
-      --shadow: 0 12px 30px rgba(255, 105, 180, 0.16);
+      --ivory: #f7f5f0;
+      --paper: #ffffff;
+      --ink: #171716;
+      --plum: #583c4b;
+      --rose: #b78d91;
+      --stone: #a59e96;
+      --sage: #76806c;
+      --line: #ddd8d1;
+      --soft: #efebe5;
+      --success: #5e715c;
+      --warning: #b07b48;
+      --danger: #9a5a5a;
+      --shadow: 0 18px 45px rgba(23, 23, 22, 0.08);
     }
 
     * {
       box-sizing: border-box;
+      scroll-behavior: smooth;
     }
 
     body {
       margin: 0;
-      font-family: "Trebuchet MS", "Avenir Next", "Segoe UI", sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(circle at 15% 20%, rgba(255,255,255,0.7) 0 6%, transparent 7%),
-        radial-gradient(circle at 80% 18%, rgba(255,255,255,0.55) 0 5%, transparent 6%),
-        radial-gradient(circle at 20% 80%, rgba(255,255,255,0.5) 0 4%, transparent 5%),
-        linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 35%, var(--bg3) 68%, #ffe5f5 100%);
-      min-height: 100vh;
+      background: var(--ivory);
+      color: var(--ink);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       line-height: 1.5;
     }
 
-    .container {
-      max-width: 1180px;
+    h1,
+    h2,
+    h3,
+    .brand {
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 500;
+      letter-spacing: -0.03em;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    /* top progress */
+    #scrollProgress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      width: 0%;
+      background: var(--plum);
+      z-index: 9999;
+    }
+
+    /* nav */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(247, 245, 240, 0.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(221, 216, 209, 0.9);
+    }
+
+    .nav-inner {
+      max-width: 1220px;
       margin: 0 auto;
-      padding: 36px 20px 80px;
+      min-height: 72px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 30px;
     }
 
+    .brand {
+      font-size: 1.18rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .nav-link {
+      padding: 9px 12px;
+      border-radius: 999px;
+      color: #68625e;
+      font-size: 0.88rem;
+      transition: 0.2s ease;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      background: var(--ink);
+      color: white;
+    }
+
+    main {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 0 24px 100px;
+    }
+
+    section {
+      scroll-margin-top: 95px;
+      padding: 72px 0;
+    }
+
+    /* hero */
     .hero {
-      position: relative;
-      overflow: hidden;
-      padding: 34px 30px;
-      border-radius: 28px;
-      border: 1px solid rgba(255,255,255,0.65);
-      background:
-        linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255, 231, 247, 0.9)),
-        linear-gradient(135deg, rgba(255,120,184,0.16), rgba(199,140,255,0.16));
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(8px);
-      margin-bottom: 24px;
-    }
-
-    .hero::before,
-    .hero::after {
-      content: "✦";
-      position: absolute;
-      color: rgba(255,255,255,0.9);
-      text-shadow: 0 0 16px rgba(255,255,255,0.95);
-      font-size: 28px;
-      pointer-events: none;
-    }
-
-    .hero::before {
-      top: 18px;
-      right: 24px;
-    }
-
-    .hero::after {
-      bottom: 18px;
-      left: 24px;
-      font-size: 22px;
+      min-height: 74vh;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      align-items: center;
+      gap: 56px;
     }
 
     .eyebrow {
-      font-size: 12px;
-      letter-spacing: 0.22em;
       text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 10px;
-      font-weight: 700;
+      letter-spacing: 0.2em;
+      font-size: 0.72rem;
+      color: var(--stone);
+      margin-bottom: 18px;
     }
 
-    h1, h2, h3 {
-      margin-top: 0;
+    .hero h1 {
+      font-size: clamp(3.2rem, 7vw, 6.4rem);
+      line-height: 0.94;
+      margin: 0;
+      max-width: 850px;
     }
 
-    h1 {
-      margin-bottom: 10px;
-      font-size: 44px;
-      line-height: 1.05;
-      color: var(--hot-pink);
-      text-shadow: 0 1px 0 rgba(255,255,255,0.7);
+    .hero p {
+      max-width: 650px;
+      color: #68625e;
+      font-size: 1.08rem;
+      margin: 28px 0;
     }
 
-    h2 {
-      font-size: 24px;
-      color: #c13787;
-      margin-bottom: 8px;
-    }
-
-    .hero p,
-    .section-note {
-      color: var(--muted);
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 22px;
-      align-items: start;
-    }
-
-    .card {
-      border-radius: 24px;
-      padding: 22px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,244,251,0.94));
-      border: 1px solid rgba(255,255,255,0.7);
+    .hero-panel {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      padding: 30px;
       box-shadow: var(--shadow);
-      backdrop-filter: blur(10px);
     }
 
-    .card.full {
-      grid-column: 1 / -1;
+    .mini-stack {
+      display: grid;
+      gap: 12px;
     }
 
-    label {
-      display: block;
-      margin: 14px 0 8px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
+    .mini-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--soft);
+      padding: 12px 0;
     }
 
-    input[type="text"],
-    input[type="file"],
-    select {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 16px;
-      border: 1px solid rgba(255, 120, 184, 0.28);
-      background: rgba(255,255,255,0.85);
-      color: var(--text);
-      font-size: 14px;
-      outline: none;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
-    }
-
-    input:focus,
-    select:focus {
-      border-color: var(--barbie-pink);
-      box-shadow:
-        0 0 0 4px rgba(255, 120, 184, 0.12),
-        0 8px 18px rgba(255, 120, 184, 0.08);
+    .mini-row:last-child {
+      border-bottom: 0;
     }
 
     .button-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 16px;
+      gap: 12px;
+      margin-top: 18px;
     }
 
-    button {
-      border: none;
+    .btn {
+      border: 0;
       border-radius: 999px;
       padding: 12px 18px;
       cursor: pointer;
-      font-size: 14px;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+      transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease;
     }
 
-    button:hover {
-      transform: translateY(-1px) scale(1.01);
-      opacity: 0.98;
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
     }
 
     .btn-primary {
+      background: var(--ink);
       color: white;
-      background: linear-gradient(135deg, var(--hot-pink), var(--barbie-pink), var(--lilac));
-      box-shadow: 0 10px 20px rgba(255, 79, 163, 0.22);
     }
 
     .btn-secondary {
-      color: #a02d73;
-      background: linear-gradient(135deg, #fff6fb, #ffe5f5, #f5ddff);
-      border: 1px solid rgba(255, 120, 184, 0.22);
-      box-shadow: 0 8px 16px rgba(255, 120, 184, 0.08);
+      background: var(--soft);
+      color: var(--ink);
+    }
+
+    .btn-plum {
+      background: var(--plum);
+      color: white;
+    }
+
+    /* headings */
+    .section-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .section-heading h2 {
+      font-size: clamp(2.1rem, 4vw, 3.2rem);
+      margin: 0;
+    }
+
+    .section-heading p {
+      margin: 0;
+      max-width: 560px;
+      color: #716b66;
+    }
+
+    /* cards */
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .grid-5 {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .grid-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: 0 8px 24px rgba(23, 23, 22, 0.04);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 34px rgba(23, 23, 22, 0.07);
+      border-color: #d1cbc3;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    summary:focus-visible {
+      outline: 3px solid rgba(88, 60, 75, 0.25);
+      outline-offset: 3px;
+    }
+
+    .kpi-label {
+      color: var(--stone);
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+
+    .kpi-value {
+      font-family: Georgia, serif;
+      font-size: 2.65rem;
+      margin-top: 8px;
+    }
+
+    .kpi-meta {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px;
+      font-size: 0.86rem;
+      color: #6b6661;
+    }
+
+    .trend-up {
+      color: var(--success);
+    }
+
+    .trend-down {
+      color: var(--danger);
+    }
+
+    .trend-flat {
+      color: var(--stone);
+    }
+
+    /* trend snapshot */
+    .trend-bars {
+      display: grid;
+      gap: 16px;
+    }
+
+    .trend-bar-row {
+      display: grid;
+      grid-template-columns: 140px 1fr 90px;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .trend-bar-label {
+      font-size: 0.86rem;
+      color: #625d59;
+    }
+
+    .trend-bar-track {
+      height: 12px;
+      border-radius: 999px;
+      background: var(--soft);
+      overflow: hidden;
+    }
+
+    .trend-bar-fill {
+      height: 100%;
+      border-radius: inherit;
+      background: var(--plum);
+      transition: width 0.45s ease;
+    }
+
+    .trend-bar-fill.negative {
+      background: var(--rose);
+    }
+
+    .trend-bar-value {
+      text-align: right;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .context-strip {
+      margin-top: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      color: #6e6863;
+      font-size: 0.84rem;
+    }
+
+    .context-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--stone);
+      display: inline-block;
+    }
+
+    .context-dot.ready {
+      background: var(--success);
+    }
+
+    /* data */
+    .source-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .source-status {
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border-radius: 999px;
+      padding: 7px 10px;
+      background: var(--soft);
+    }
+
+    .source-status.ready {
+      background: #e7eee4;
+      color: var(--success);
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      margin-bottom: 7px;
+      color: #6e6863;
+    }
+
+    input,
+    select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: white;
+      border-radius: 13px;
+      padding: 11px 12px;
+      color: var(--ink);
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--plum);
+      box-shadow: 0 0 0 3px rgba(88, 60, 75, 0.08);
+    }
+
+    /* recommendation */
+    .recommendation-card {
+      border-left: 4px solid var(--plum);
+    }
+
+    .recommendation-action {
+      font-family: Georgia, serif;
+      font-size: 2.3rem;
+      margin: 8px 0;
+    }
+
+    .pill {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: var(--soft);
+      margin-right: 6px;
+    }
+
+    /* scenario */
+    .scenario-layout {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 18px;
+    }
+
+    .slider-wrap {
+      margin: 18px 0;
+    }
+
+    .slider-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 8px;
+    }
+
+    input[type="range"] {
+      padding: 0;
+      accent-color: var(--plum);
+    }
+
+    .scenario-comparison {
+      display: grid;
+      gap: 10px;
+    }
+
+    .comparison-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--soft);
+    }
+
+    .comparison-row:last-child {
+      border-bottom: 0;
+    }
+
+    .comparison-number {
+      font-family: Georgia, serif;
+      font-size: 1.35rem;
+    }
+
+    /* alerts */
+    .alert-card {
+      border-left: 4px solid var(--stone);
+    }
+
+    .alert-card.high {
+      border-left-color: var(--danger);
+    }
+
+    .alert-card.medium {
+      border-left-color: var(--warning);
+    }
+
+    .alert-card.low {
+      border-left-color: var(--sage);
+    }
+
+    /* collapsible */
+    details {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 600;
     }
 
     pre {
-      background: rgba(255,255,255,0.7);
-      border: 1px solid rgba(255, 145, 201, 0.22);
-      border-radius: 18px;
-      padding: 16px;
       overflow-x: auto;
       white-space: pre-wrap;
-      font-family: "SFMono-Regular", Menlo, monospace;
-      font-size: 12px;
-      color: #6c3c60;
-      margin-top: 14px;
-      max-height: 320px;
-      overflow-y: auto;
-    }
-
-    .score-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 12px;
-      margin-top: 16px;
-    }
-
-    .score-card {
-      border-radius: 20px;
+      word-break: break-word;
+      background: #181817;
+      color: #f2eee8;
+      border-radius: 14px;
       padding: 16px;
-      min-height: 110px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.88), rgba(255,239,249,0.95));
-      border: 1px solid rgba(255, 145, 201, 0.24);
-      box-shadow: 0 10px 18px rgba(255, 120, 184, 0.08);
+      margin-top: 14px;
+      max-height: 380px;
+      overflow-y: auto;
+      font-size: 0.78rem;
     }
 
-    .score-title {
-      font-size: 12px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 12px;
-      font-weight: 700;
+    /* toast */
+    #toastContainer {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      display: grid;
+      gap: 10px;
+      z-index: 999;
     }
 
-    .score-value {
-      font-size: 30px;
-      font-weight: 800;
-      color: var(--hot-pink);
-      text-shadow: 0 1px 0 rgba(255,255,255,0.7);
+    .toast {
+      background: var(--ink);
+      color: white;
+      padding: 13px 16px;
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      min-width: 260px;
+      animation: slideIn 0.25s ease;
     }
 
-    .explanation-box {
-      margin-top: 16px;
-      padding: 18px;
-      border-radius: 20px;
-      background: linear-gradient(135deg, rgba(255,255,255,0.82), rgba(255,235,246,0.95));
-      border: 1px solid rgba(255, 145, 201, 0.25);
-      color: var(--text);
-      box-shadow: 0 10px 18px rgba(255, 120, 184, 0.08);
+    .toast.error {
+      background: #7e4545;
     }
 
-    .section-note {
-      margin-top: -4px;
-      margin-bottom: 14px;
-      font-size: 14px;
+    .toast.success {
+      background: #536651;
     }
 
-    code {
-      background: rgba(255,255,255,0.65);
-      padding: 2px 8px;
-      border-radius: 999px;
-      color: #b13d84;
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
-    @media (max-width: 960px) {
-      .grid {
+    /* loader */
+    .loading {
+      opacity: 0.55;
+      pointer-events: none;
+    }
+
+    /* reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: 0.55s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* back to top */
+    #backToTop {
+      position: fixed;
+      right: 22px;
+      bottom: 92px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      background: white;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.2s ease;
+      z-index: 80;
+    }
+
+    #backToTop.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    @media (max-width: 1050px) {
+      .grid-5 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid-4,
+      .grid-3 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .hero,
+      .scenario-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .nav-inner {
+        align-items: flex-start;
+        padding-top: 14px;
+        padding-bottom: 14px;
+        flex-direction: column;
+      }
+
+      .grid-5,
+      .grid-4,
+      .grid-3,
+      .grid-2 {
         grid-template-columns: 1fr;
       }
 
-      .score-grid {
-        grid-template-columns: repeat(2, 1fr);
+      .section-heading {
+        align-items: flex-start;
+        flex-direction: column;
       }
 
-      h1 {
-        font-size: 34px;
+      .comparison-row {
+        grid-template-columns: 1fr 1fr;
       }
-    }
 
-    @media (max-width: 560px) {
-      .score-grid {
-        grid-template-columns: 1fr;
+      .trend-bar-row {
+        grid-template-columns: 100px 1fr 70px;
+      }
+
+      section {
+        padding: 54px 0;
       }
     }
   </style>
 </head>
+
 <body>
-  <div class="container">
-    <section class="hero">
-      <div class="eyebrow">Barbie Fashion Fairytale Inspired Prototype</div>
-      <h1>Causal Couture</h1>
-      <p>
-        Upload raw source files, process them into analytical datasets, build a unified daily SKU view,
-        and generate early-stage demand, stock, engagement, and conversion signals with business-facing explanations.
-      </p>
+  <div id="scrollProgress"></div>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="#overview" class="brand">Causal Couture</a>
+
+      <div class="nav-links">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#data" class="nav-link">Data</a>
+        <a href="#intelligence" class="nav-link">Intelligence</a>
+        <a href="#scenario" class="nav-link">Scenario Lab</a>
+        <a href="#insights" class="nav-link">Insights</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <section id="overview">
+      <div class="hero">
+        <div>
+          <div class="eyebrow">Fashion Intelligence Platform</div>
+
+          <h1>
+            Retail intelligence,
+            built around decisions.
+          </h1>
+
+          <p>
+            Bring sales, inventory, social engagement and web behavior
+            into one analytical view. Understand current signals,
+            test what-if scenarios and turn business data into clearer
+            inventory decisions.
+          </p>
+
+          <div class="button-row">
+            <a class="btn btn-primary" href="#data">
+              Start with Data
+            </a>
+
+            <a class="btn btn-secondary" href="#scenario">
+              Open Scenario Lab
+            </a>
+          </div>
+        </div>
+
+        <div class="hero-panel">
+          <div class="eyebrow">Current Workflow</div>
+
+          <div class="mini-stack">
+            <div class="mini-row">
+              <span>Upload</span>
+              <span>01</span>
+            </div>
+
+            <div class="mini-row">
+              <span>Validate</span>
+              <span>02</span>
+            </div>
+
+            <div class="mini-row">
+              <span>Integrate</span>
+              <span>03</span>
+            </div>
+
+            <div class="mini-row">
+              <span>Analyze</span>
+              <span>04</span>
+            </div>
+
+            <div class="mini-row">
+              <span>Simulate</span>
+              <span>05</span>
+            </div>
+
+            <div class="mini-row">
+              <span>Decide</span>
+              <span>06</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">Executive Overview</div>
+          <h2>Current signals</h2>
+        </div>
+
+        <p>
+          Select a unified dataset below and load the intelligence
+          dashboard to populate the latest metrics.
+        </p>
+      </div>
+
+      <div class="grid grid-5 reveal">
+        <div class="card">
+          <div class="kpi-label">Demand Pressure</div>
+          <div class="kpi-value" id="demandScore">—</div>
+          <div class="kpi-meta" id="demandTrend">Waiting for data</div>
+        </div>
+
+        <div class="card">
+          <div class="kpi-label">Stock Risk</div>
+          <div class="kpi-value" id="stockScore">—</div>
+          <div class="kpi-meta" id="stockTrend">Waiting for data</div>
+        </div>
+
+        <div class="card">
+          <div class="kpi-label">Engagement</div>
+          <div class="kpi-value" id="engagementScore">—</div>
+          <div class="kpi-meta" id="engagementTrend">Waiting for data</div>
+        </div>
+
+        <div class="card">
+          <div class="kpi-label">Conversion</div>
+          <div class="kpi-value" id="conversionScore">—</div>
+          <div class="kpi-meta" id="conversionTrend">Waiting for data</div>
+        </div>
+
+        <div class="card">
+          <div class="kpi-label">Overall Signal</div>
+          <div class="kpi-value" id="overallScore">—</div>
+          <div class="kpi-meta">Combined heuristic signal</div>
+        </div>
+      </div>
+
+      <div class="card reveal" style="margin-top:18px;">
+        <div class="section-heading" style="margin-bottom:18px;">
+          <div>
+            <div class="eyebrow">Trend Snapshot</div>
+            <h3 style="margin:0;">Recent movement</h3>
+          </div>
+
+          <p style="margin:0;color:#716b66;">
+            Recent-period change compared with the previous period.
+          </p>
+        </div>
+
+        <div id="trendBars" class="trend-bars">
+          <p style="color:#716b66;">Load intelligence to view trends.</p>
+        </div>
+
+        <div class="context-strip">
+          <span class="context-dot" id="dashboardStatusDot"></span>
+          <span id="dashboardStatusText">No dataset loaded</span>
+          <span>•</span>
+          <span id="dashboardTimestamp">—</span>
+        </div>
+      </div>
     </section>
 
-    <div class="grid">
-      <section class="card">
-        <h2>1) Upload + Process</h2>
-        <p class="section-note">Validate and process sales, inventory, social, or web source files.</p>
-
-        <label for="sourceType">Source Type</label>
-        <select id="sourceType">
-          <option value="sales">sales</option>
-          <option value="inventory">inventory</option>
-          <option value="social">social</option>
-          <option value="web">web</option>
-        </select>
-
-        <label for="fileInput">Choose CSV File</label>
-        <input type="file" id="fileInput" accept=".csv" />
-
-        <div class="button-row">
-          <button class="btn-primary" onclick="uploadFile()">Upload + Process</button>
+    <section id="data">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">Data Center</div>
+          <h2>Prepare your analytical view</h2>
         </div>
 
-        <pre id="result">No file uploaded yet.</pre>
-      </section>
+        <p>
+          Upload source-level data, build a unified dataset and select
+          the version you want to analyze.
+        </p>
+      </div>
 
-      <section class="card">
-        <h2>2) Processed Files</h2>
-        <p class="section-note">Load source-level and unified processed files into the interface.</p>
+      <div class="grid grid-2 reveal">
+        <div class="card">
+          <h3>Upload source file</h3>
 
-        <div class="button-row">
-          <button class="btn-secondary" onclick="loadProcessedFiles()">Load Source Files</button>
-          <button class="btn-secondary" onclick="loadUnifiedFiles()">Load Unified Files</button>
-        </div>
+          <label for="sourceType">Source type</label>
+          <select id="sourceType">
+            <option value="sales">Sales</option>
+            <option value="inventory">Inventory</option>
+            <option value="social">Social</option>
+            <option value="web">Web</option>
+          </select>
 
-        <label for="salesFile">Sales Processed File</label>
-        <select id="salesFile"></select>
+          <br />
 
-        <label for="inventoryFile">Inventory Processed File</label>
-        <select id="inventoryFile"></select>
+          <label for="fileInput">CSV file</label>
+          <input type="file" id="fileInput" accept=".csv" />
 
-        <label for="socialFile">Social Processed File</label>
-        <select id="socialFile"></select>
+          <div class="button-row">
+            <button id="uploadBtn" class="btn btn-primary" onclick="uploadFile()">
+              Upload + Process
+            </button>
 
-        <label for="webFile">Web Processed File</label>
-        <select id="webFile"></select>
-
-        <label for="scorecardFilename">Unified File</label>
-        <select id="scorecardFilename"></select>
-
-        <pre id="processedFilesResult">No processed files loaded yet.</pre>
-      </section>
-
-      <section class="card full">
-        <h2>3) Build Unified Dataset</h2>
-        <p class="section-note">Merge processed source files into a single daily <code>date × sku_id</code> analytical dataset.</p>
-
-        <div class="button-row">
-          <button class="btn-primary" onclick="buildUnified()">Build Unified Dataset</button>
-        </div>
-
-        <pre id="unifiedResult">No unified dataset built yet.</pre>
-      </section>
-
-      <section class="card">
-        <h2>4) Starter Analysis</h2>
-        <p class="section-note">Run the starter analytical layer over a processed or unified file.</p>
-
-        <label for="analysisSourceType">Analysis Source Type</label>
-        <select id="analysisSourceType">
-          <option value="sales">sales</option>
-          <option value="inventory">inventory</option>
-          <option value="social">social</option>
-          <option value="web">web</option>
-          <option value="unified">unified</option>
-        </select>
-
-        <label for="processedFilename">Selected Filename</label>
-        <input type="text" id="processedFilename" />
-
-        <div class="button-row">
-          <button class="btn-secondary" onclick="runAnalysis()">Run Starter Analysis</button>
-        </div>
-
-        <pre id="analysisResult">No analysis run yet.</pre>
-      </section>
-
-      <section class="card">
-        <h2>5) Unified Scorecard + Explanation</h2>
-        <p class="section-note">Generate starter decision signals and a plain-English explanation.</p>
-
-        <div class="button-row">
-          <button class="btn-primary" onclick="runScorecard()">Run Scorecard</button>
-          <button class="btn-secondary" onclick="runExplanation()">Run Explanation</button>
-        </div>
-
-        <pre id="scorecardResult">No scorecard run yet.</pre>
-
-        <div class="score-grid">
-          <div class="score-card">
-            <div class="score-title">Demand Pressure</div>
-            <div class="score-value" id="demandScore">-</div>
+            <button class="btn btn-secondary" onclick="loadProcessedFiles()">
+              Refresh Files
+            </button>
           </div>
-          <div class="score-card">
-            <div class="score-title">Stock Risk</div>
-            <div class="score-value" id="stockScore">-</div>
-          </div>
-          <div class="score-card">
-            <div class="score-title">Engagement</div>
-            <div class="score-value" id="engagementScore">-</div>
-          </div>
-          <div class="score-card">
-            <div class="score-title">Conversion</div>
-            <div class="score-value" id="conversionScore">-</div>
-          </div>
-          <div class="score-card">
-            <div class="score-title">Overall Signal</div>
-            <div class="score-value" id="overallScore">-</div>
-          </div>
+
+          <details>
+            <summary>Technical upload details</summary>
+            <pre id="uploadTechnical">No upload yet.</pre>
+          </details>
         </div>
 
-        <div class="explanation-box">
-          <strong>Business Explanation</strong>
-          <p id="businessExplanation">No explanation generated yet.</p>
+        <div class="card">
+          <h3>Unified dataset</h3>
+
+          <label for="salesFile">Sales</label>
+          <select id="salesFile"></select>
+
+          <label for="inventoryFile">Inventory</label>
+          <select id="inventoryFile"></select>
+
+          <label for="socialFile">Social</label>
+          <select id="socialFile"></select>
+
+          <label for="webFile">Web</label>
+          <select id="webFile"></select>
+
+          <div class="button-row">
+            <button id="buildUnifiedBtn" class="btn btn-plum" onclick="buildUnified()">
+              Build Unified Dataset
+            </button>
+          </div>
+
+          <label for="unifiedFile">Selected unified dataset</label>
+          <select id="unifiedFile"></select>
+
+          <div class="button-row">
+            <button id="dashboardBtn" class="btn btn-primary" onclick="loadDashboard()">
+              Load Intelligence
+            </button>
+
+            <button class="btn btn-secondary" onclick="loadUnifiedFiles()">
+              Refresh Unified Files
+            </button>
+          </div>
+
+          <details>
+            <summary>Technical dataset details</summary>
+            <pre id="datasetTechnical">No dataset selected yet.</pre>
+          </details>
         </div>
-      </section>
-    </div>
-  </div>
+      </div>
+
+      <div class="grid grid-4 reveal" style="margin-top:18px;">
+        <div class="card source-card">
+          <span>Sales</span>
+          <span class="source-status" id="salesStatus">Unknown</span>
+        </div>
+
+        <div class="card source-card">
+          <span>Inventory</span>
+          <span class="source-status" id="inventoryStatus">Unknown</span>
+        </div>
+
+        <div class="card source-card">
+          <span>Social</span>
+          <span class="source-status" id="socialStatus">Unknown</span>
+        </div>
+
+        <div class="card source-card">
+          <span>Web</span>
+          <span class="source-status" id="webStatus">Unknown</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="intelligence">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">Decision Intelligence</div>
+          <h2>What needs attention</h2>
+        </div>
+
+        <p>
+          Recommendations are rule-based decision-support signals,
+          not causal conclusions or forecasts.
+        </p>
+      </div>
+
+      <div class="grid grid-2 reveal">
+        <div class="card recommendation-card">
+          <div class="eyebrow">Current Recommendation</div>
+
+          <div class="recommendation-action" id="recommendationAction">
+            Waiting for data
+          </div>
+
+          <div>
+            <span class="pill" id="recommendationPriority">Priority —</span>
+            <span class="pill" id="recommendationConfidence">Confidence —</span>
+          </div>
+
+          <p id="recommendationReason" style="margin-top:18px;color:#68625e;">
+            Load a unified dataset to generate a recommendation.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="eyebrow">Dataset Summary</div>
+
+          <div class="mini-stack">
+            <div class="mini-row">
+              <span>Rows</span>
+              <strong id="datasetRows">—</strong>
+            </div>
+
+            <div class="mini-row">
+              <span>Unique SKUs</span>
+              <strong id="datasetSkus">—</strong>
+            </div>
+
+            <div class="mini-row">
+              <span>Date Start</span>
+              <strong id="datasetStart">—</strong>
+            </div>
+
+            <div class="mini-row">
+              <span>Date End</span>
+              <strong id="datasetEnd">—</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="scenario">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">Scenario Lab</div>
+          <h2>Test a business assumption</h2>
+        </div>
+
+        <p>
+          Adjust the assumptions below and compare the simulated result
+          against the current baseline.
+        </p>
+      </div>
+
+      <div class="scenario-layout reveal">
+        <div class="card">
+          <h3>Scenario assumptions</h3>
+
+          <div class="button-row" style="margin-top: 8px; margin-bottom: 18px;">
+            <button class="btn btn-secondary" onclick="applyPreset('demandSurge')">
+              Demand Surge
+            </button>
+
+            <button class="btn btn-secondary" onclick="applyPreset('inventoryPressure')">
+              Inventory Pressure
+            </button>
+
+            <button class="btn btn-secondary" onclick="applyPreset('engagementLift')">
+              Engagement Lift
+            </button>
+
+            <button class="btn btn-secondary" onclick="applyPreset('softeningDemand')">
+              Softening Demand
+            </button>
+          </div>
+
+          <div class="slider-wrap">
+            <div class="slider-head">
+              <label for="demandSlider">Demand change</label>
+              <strong id="demandValue">0%</strong>
+            </div>
+            <input type="range" id="demandSlider" min="-50" max="100" value="0" />
+          </div>
+
+          <div class="slider-wrap">
+            <div class="slider-head">
+              <label for="inventorySlider">Inventory change</label>
+              <strong id="inventoryValue">0%</strong>
+            </div>
+            <input type="range" id="inventorySlider" min="-50" max="100" value="0" />
+          </div>
+
+          <div class="slider-wrap">
+            <div class="slider-head">
+              <label for="engagementSlider">Engagement change</label>
+              <strong id="engagementValue">0%</strong>
+            </div>
+            <input type="range" id="engagementSlider" min="-50" max="100" value="0" />
+          </div>
+
+          <div class="slider-wrap">
+            <div class="slider-head">
+              <label for="conversionSlider">Conversion change</label>
+              <strong id="conversionValue">0%</strong>
+            </div>
+            <input type="range" id="conversionSlider" min="-50" max="100" value="0" />
+          </div>
+
+          <div class="button-row">
+            <button id="scenarioBtn" class="btn btn-plum" onclick="runScenario()">
+              Run Scenario
+            </button>
+
+            <button class="btn btn-secondary" onclick="resetScenario()">
+              Reset
+            </button>
+          </div>
+
+          <details>
+            <summary>Methodology note</summary>
+            <p style="color:#6d6762;">
+              Scenario outputs are structured what-if simulations.
+              They are not forecasts and do not estimate causal effects.
+            </p>
+          </details>
+        </div>
+
+        <div class="card">
+          <h3>Baseline vs scenario</h3>
+
+          <div class="scenario-comparison" id="scenarioComparison">
+            <p style="color:#77716c;">
+              Run a scenario to see the comparison.
+            </p>
+          </div>
+
+          <div class="card recommendation-card" style="margin-top:18px;box-shadow:none;">
+            <div class="eyebrow">Scenario Recommendation</div>
+            <div class="recommendation-action" id="scenarioAction">—</div>
+            <div style="margin-bottom:12px;">
+              <span class="pill" id="scenarioConfidence">Confidence —</span>
+            </div>
+            <p id="scenarioExplanation" style="color:#68625e;">
+              No scenario has been run yet.
+            </p>
+          </div>
+
+          <details>
+            <summary>Technical scenario output</summary>
+            <pre id="scenarioTechnical">No scenario yet.</pre>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section id="insights">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">Insights</div>
+          <h2>Alerts and observations</h2>
+        </div>
+
+        <p>
+          These alerts summarize patterns detected by the current
+          heuristic and descriptive rules.
+        </p>
+      </div>
+
+      <div id="alertsGrid" class="grid grid-3 reveal">
+        <div class="card">
+          <p style="color:#716b66;">Load a dashboard to generate alerts.</p>
+        </div>
+      </div>
+
+      <details>
+        <summary>Full dashboard API response</summary>
+        <pre id="dashboardTechnical">No dashboard loaded.</pre>
+      </details>
+    </section>
+  </main>
+
+  <button id="backToTop" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+    ↑
+  </button>
+
+  <div id="toastContainer"></div>
 
   <script>
+    const API = "http://127.0.0.1:8000";
+
+    function toast(message, type = "success") {
+      const container = document.getElementById("toastContainer");
+      const el = document.createElement("div");
+
+      el.className = `toast ${type}`;
+      el.textContent = message;
+
+      container.appendChild(el);
+
+      setTimeout(() => {
+        el.remove();
+      }, 3200);
+    }
+
     function fillSelect(id, values) {
       const select = document.getElementById(id);
       const current = select.value;
+
       select.innerHTML = '<option value="">Select a file</option>';
-      values.forEach(v => {
+
+      values.forEach(value => {
         const option = document.createElement("option");
-        option.value = v;
-        option.textContent = v;
+        option.value = value;
+        option.textContent = value;
         select.appendChild(option);
       });
+
       if (values.includes(current)) {
         select.value = current;
+      }
+    }
+
+    function setLoading(buttonId, loading) {
+      const button = document.getElementById(buttonId);
+      if (!button) return;
+
+      button.disabled = loading;
+
+      if (loading) {
+        button.dataset.originalText = button.textContent;
+        button.textContent = "Working...";
+      } else {
+        button.textContent = button.dataset.originalText || button.textContent;
       }
     }
 
     async function uploadFile() {
       const sourceType = document.getElementById("sourceType").value;
       const fileInput = document.getElementById("fileInput");
-      const resultBox = document.getElementById("result");
+      const technical = document.getElementById("uploadTechnical");
 
       if (!fileInput.files.length) {
-        resultBox.textContent = "Please select a CSV file.";
+        toast("Choose a CSV file first.", "error");
         return;
       }
+
+      setLoading("uploadBtn", true);
 
       const formData = new FormData();
       formData.append("source_type", sourceType);
       formData.append("file", fileInput.files[0]);
 
       try {
-        const response = await fetch("http://127.0.0.1:8000/upload", {
+        const response = await fetch(`${API}/upload`, {
           method: "POST",
           body: formData
         });
 
         const data = await response.json();
-        resultBox.textContent = JSON.stringify(data, null, 2);
+        technical.textContent = JSON.stringify(data, null, 2);
 
-        if (data.processed_filename) {
-          document.getElementById("processedFilename").value = data.processed_filename;
-          await loadProcessedFiles();
+        if (!data.valid) {
+          toast(data.errors?.[0] || "File validation failed.", "error");
+          return;
         }
+
+        toast(`${sourceType} file processed successfully.`);
+        await loadProcessedFiles();
       } catch (error) {
-        resultBox.textContent = "Error connecting to API: " + error;
+        toast("Could not connect to the API.", "error");
+      } finally {
+        setLoading("uploadBtn", false);
       }
     }
 
     async function loadProcessedFiles() {
-      const box = document.getElementById("processedFilesResult");
       try {
-        const response = await fetch("http://127.0.0.1:8000/files/processed/by-source");
+        const response = await fetch(`${API}/files/processed/by-source`);
         const data = await response.json();
-        box.textContent = JSON.stringify(data, null, 2);
 
         fillSelect("salesFile", data.sales || []);
         fillSelect("inventoryFile", data.inventory || []);
         fillSelect("socialFile", data.social || []);
         fillSelect("webFile", data.web || []);
       } catch (error) {
-        box.textContent = "Error loading processed files: " + error;
+        toast("Could not load processed files.", "error");
       }
     }
 
     async function loadUnifiedFiles() {
-      const box = document.getElementById("processedFilesResult");
       try {
-        const response = await fetch("http://127.0.0.1:8000/files/unified");
+        const response = await fetch(`${API}/files/unified`);
         const data = await response.json();
-        box.textContent = JSON.stringify(data, null, 2);
 
-        fillSelect("scorecardFilename", data.files || []);
+        fillSelect("unifiedFile", data.files || []);
       } catch (error) {
-        box.textContent = "Error loading unified files: " + error;
+        toast("Could not load unified datasets.", "error");
       }
     }
 
     async function buildUnified() {
-      const box = document.getElementById("unifiedResult");
+      setLoading("buildUnifiedBtn", true);
 
       const formData = new FormData();
       formData.append("sales_file", document.getElementById("salesFile").value);
@@ -517,106 +1266,530 @@
       formData.append("web_file", document.getElementById("webFile").value);
 
       try {
-        const response = await fetch("http://127.0.0.1:8000/phase2/build-unified", {
+        const response = await fetch(`${API}/phase2/build-unified`, {
           method: "POST",
           body: formData
         });
 
         const data = await response.json();
-        box.textContent = JSON.stringify(data, null, 2);
 
-        if (data.unified_filename) {
-          document.getElementById("processedFilename").value = data.unified_filename;
-          document.getElementById("analysisSourceType").value = "unified";
-          await loadUnifiedFiles();
-          document.getElementById("scorecardFilename").value = data.unified_filename;
-        }
-      } catch (error) {
-        box.textContent = "Error building unified dataset: " + error;
-      }
-    }
+        document.getElementById("datasetTechnical").textContent =
+          JSON.stringify(data, null, 2);
 
-    async function runAnalysis() {
-      const sourceType = document.getElementById("analysisSourceType").value;
-      let processedFilename = document.getElementById("processedFilename").value;
-
-      if (!processedFilename && sourceType === "unified") {
-        processedFilename = document.getElementById("scorecardFilename").value;
-        document.getElementById("processedFilename").value = processedFilename;
-      }
-
-      const resultBox = document.getElementById("analysisResult");
-
-      if (!processedFilename) {
-        resultBox.textContent = "Please enter or select a filename.";
-        return;
-      }
-
-      try {
-        const response = await fetch(
-          `http://127.0.0.1:8000/phase3/analyze?source_type=${sourceType}&processed_filename=${processedFilename}`
-        );
-        const data = await response.json();
-        resultBox.textContent = JSON.stringify(data, null, 2);
-      } catch (error) {
-        resultBox.textContent = "Error running analysis: " + error;
-      }
-    }
-
-    async function runScorecard() {
-      const processedFilename = document.getElementById("scorecardFilename").value;
-      const resultBox = document.getElementById("scorecardResult");
-
-      if (!processedFilename) {
-        resultBox.textContent = "Please select a unified filename.";
-        return;
-      }
-
-      try {
-        const response = await fetch(
-          `http://127.0.0.1:8000/phase3/scorecard?processed_filename=${processedFilename}`
-        );
-        const data = await response.json();
-        resultBox.textContent = JSON.stringify(data, null, 2);
-
-        document.getElementById("demandScore").textContent = data.demand_pressure_score ?? "-";
-        document.getElementById("stockScore").textContent = data.stock_risk_score ?? "-";
-        document.getElementById("engagementScore").textContent = data.engagement_momentum_score ?? "-";
-        document.getElementById("conversionScore").textContent = data.conversion_strength_score ?? "-";
-        document.getElementById("overallScore").textContent = data.overall_signal_score ?? "-";
-      } catch (error) {
-        resultBox.textContent = "Error running scorecard: " + error;
-      }
-    }
-
-    async function runExplanation() {
-      const processedFilename = document.getElementById("scorecardFilename").value;
-      const explanationBox = document.getElementById("businessExplanation");
-
-      if (!processedFilename) {
-        explanationBox.textContent = "Please select a unified filename.";
-        return;
-      }
-
-      try {
-        const response = await fetch(
-          `http://127.0.0.1:8000/phase3/explain?processed_filename=${processedFilename}`
-        );
-        const data = await response.json();
-
-        if (data.scorecard) {
-          document.getElementById("demandScore").textContent = data.scorecard.demand_pressure_score ?? "-";
-          document.getElementById("stockScore").textContent = data.scorecard.stock_risk_score ?? "-";
-          document.getElementById("engagementScore").textContent = data.scorecard.engagement_momentum_score ?? "-";
-          document.getElementById("conversionScore").textContent = data.scorecard.conversion_strength_score ?? "-";
-          document.getElementById("overallScore").textContent = data.scorecard.overall_signal_score ?? "-";
+        if (data.error) {
+          toast(data.error, "error");
+          return;
         }
 
-        explanationBox.textContent = data.explanation?.full_explanation || "No explanation returned.";
+        toast("Unified dataset created.");
+
+        await loadUnifiedFiles();
+
+        document.getElementById("unifiedFile").value =
+          data.unified_filename || "";
       } catch (error) {
-        explanationBox.textContent = "Error running explanation: " + error;
+        toast("Unified dataset creation failed.", "error");
+      } finally {
+        setLoading("buildUnifiedBtn", false);
       }
     }
+
+    function trendMarkup(trend) {
+      if (!trend) return "No trend";
+
+      let symbol = "→";
+      let cls = "trend-flat";
+
+      if (trend.direction === "up") {
+        symbol = "↑";
+        cls = "trend-up";
+      }
+
+      if (trend.direction === "down") {
+        symbol = "↓";
+        cls = "trend-down";
+      }
+
+      return `
+        <span class="${cls}">
+          ${symbol} ${Math.abs(trend.change_pct || 0)}%
+        </span>
+        <span>${trend.label || ""}</span>
+      `;
+    }
+
+    function renderTrendBars(kpis) {
+      const container = document.getElementById("trendBars");
+
+      if (!container) return;
+
+      const metrics = [
+        ["Demand", kpis?.demand_pressure?.trend],
+        ["Inventory", kpis?.stock_risk?.trend],
+        ["Engagement", kpis?.engagement_momentum?.trend],
+        ["Conversion", kpis?.conversion_strength?.trend]
+      ];
+
+      container.innerHTML = "";
+
+      metrics.forEach(([label, trend]) => {
+        if (!trend) return;
+
+        const change = Number(trend.change_pct || 0);
+        const width = Math.min(Math.abs(change), 100);
+
+        const row = document.createElement("div");
+        row.className = "trend-bar-row";
+
+        row.innerHTML = `
+          <div class="trend-bar-label">${label}</div>
+
+          <div class="trend-bar-track" title="${trend.label || "stable"}">
+            <div
+              class="trend-bar-fill ${change < 0 ? "negative" : ""}"
+              style="width:${width}%"
+            ></div>
+          </div>
+
+          <div class="trend-bar-value">
+            ${change > 0 ? "+" : ""}${change}%
+          </div>
+        `;
+
+        container.appendChild(row);
+      });
+
+      if (!container.children.length) {
+        container.innerHTML =
+          '<p style="color:#716b66;">No trend data available for this dataset.</p>';
+      }
+    }
+
+    function updateSourceStatus(id, available) {
+      const el = document.getElementById(id);
+
+      el.textContent = available ? "Ready" : "Missing";
+
+      el.classList.toggle("ready", available);
+    }
+
+    async function loadDashboard() {
+      const filename = document.getElementById("unifiedFile").value;
+
+      if (!filename) {
+        toast("Select a unified dataset first.", "error");
+        return;
+      }
+
+      setLoading("dashboardBtn", true);
+
+      try {
+        const response = await fetch(
+          `${API}/phase4/dashboard?processed_filename=${encodeURIComponent(filename)}`
+        );
+
+        const data = await response.json();
+
+        if (data.error) {
+          toast(data.error, "error");
+          return;
+        }
+
+        document.getElementById("dashboardTechnical").textContent =
+          JSON.stringify(data, null, 2);
+
+        document.getElementById("datasetTechnical").textContent =
+          JSON.stringify(data.dataset, null, 2);
+
+        document.getElementById("demandScore").textContent =
+          data.kpis.demand_pressure.score ?? "—";
+
+        document.getElementById("stockScore").textContent =
+          data.kpis.stock_risk.score ?? "—";
+
+        document.getElementById("engagementScore").textContent =
+          data.kpis.engagement_momentum.score ?? "—";
+
+        document.getElementById("conversionScore").textContent =
+          data.kpis.conversion_strength.score ?? "—";
+
+        document.getElementById("overallScore").textContent =
+          data.kpis.overall_signal.score ?? "—";
+
+        document.getElementById("demandTrend").innerHTML =
+          trendMarkup(data.kpis.demand_pressure.trend);
+
+        document.getElementById("stockTrend").innerHTML =
+          trendMarkup(data.kpis.stock_risk.trend);
+
+        document.getElementById("engagementTrend").innerHTML =
+          trendMarkup(data.kpis.engagement_momentum.trend);
+
+        document.getElementById("conversionTrend").innerHTML =
+          trendMarkup(data.kpis.conversion_strength.trend);
+
+        const rec = data.recommendation || {};
+
+        document.getElementById("recommendationAction").textContent =
+          rec.action || "HOLD";
+
+        document.getElementById("recommendationPriority").textContent =
+          `Priority ${rec.priority || "—"}`;
+
+        document.getElementById("recommendationConfidence").textContent =
+          `Confidence ${rec.confidence || "—"}`;
+
+        document.getElementById("recommendationReason").textContent =
+          rec.reason || "No recommendation reason available.";
+
+        document.getElementById("datasetRows").textContent =
+          data.dataset.rows ?? "—";
+
+        document.getElementById("datasetSkus").textContent =
+          data.dataset.unique_skus ?? "—";
+
+        document.getElementById("datasetStart").textContent =
+          data.dataset.date_start ?? "—";
+
+        document.getElementById("datasetEnd").textContent =
+          data.dataset.date_end ?? "—";
+
+        updateSourceStatus(
+          "salesStatus",
+          data.data_sources.sales.available
+        );
+
+        updateSourceStatus(
+          "inventoryStatus",
+          data.data_sources.inventory.available
+        );
+
+        updateSourceStatus(
+          "socialStatus",
+          data.data_sources.social.available
+        );
+
+        updateSourceStatus(
+          "webStatus",
+          data.data_sources.web.available
+        );
+
+        renderAlerts(data.alerts || []);
+        renderTrendBars(data.kpis);
+
+        const statusDot = document.getElementById("dashboardStatusDot");
+        const statusText = document.getElementById("dashboardStatusText");
+        const timestamp = document.getElementById("dashboardTimestamp");
+
+        if (statusDot) statusDot.classList.add("ready");
+        if (statusText) statusText.textContent = `Loaded: ${filename}`;
+        if (timestamp) timestamp.textContent =
+          `Updated ${new Date().toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"})}`;
+
+        toast("Intelligence dashboard updated.");
+      } catch (error) {
+        toast("Dashboard loading failed.", "error");
+      } finally {
+        setLoading("dashboardBtn", false);
+      }
+    }
+
+    function renderAlerts(alerts) {
+      const grid = document.getElementById("alertsGrid");
+      grid.innerHTML = "";
+
+      if (!alerts.length) {
+        grid.innerHTML = `
+          <div class="card">
+            <p>No active alerts.</p>
+          </div>
+        `;
+        return;
+      }
+
+      alerts.forEach(alert => {
+        const el = document.createElement("div");
+
+        el.className = `card alert-card ${alert.severity || "low"}`;
+
+        el.innerHTML = `
+          <div class="eyebrow">
+            ${(alert.category || "general").toUpperCase()}
+          </div>
+          <h3>${alert.title || "Alert"}</h3>
+          <p style="color:#6c6661;">
+            ${alert.message || ""}
+          </p>
+          <span class="pill">
+            ${alert.severity || "low"}
+          </span>
+        `;
+
+        grid.appendChild(el);
+      });
+    }
+
+    function updateSliderDisplay() {
+      document.getElementById("demandValue").textContent =
+        `${document.getElementById("demandSlider").value}%`;
+
+      document.getElementById("inventoryValue").textContent =
+        `${document.getElementById("inventorySlider").value}%`;
+
+      document.getElementById("engagementValue").textContent =
+        `${document.getElementById("engagementSlider").value}%`;
+
+      document.getElementById("conversionValue").textContent =
+        `${document.getElementById("conversionSlider").value}%`;
+    }
+
+    function applyPreset(presetName) {
+      const presets = {
+        demandSurge: {
+          demand: 20,
+          inventory: -10,
+          engagement: 10,
+          conversion: 5
+        },
+
+        inventoryPressure: {
+          demand: 15,
+          inventory: -25,
+          engagement: 5,
+          conversion: 0
+        },
+
+        engagementLift: {
+          demand: 5,
+          inventory: 0,
+          engagement: 35,
+          conversion: 0
+        },
+
+        softeningDemand: {
+          demand: -20,
+          inventory: 20,
+          engagement: -10,
+          conversion: -5
+        }
+      };
+
+      const preset = presets[presetName];
+
+      if (!preset) return;
+
+      document.getElementById("demandSlider").value = preset.demand;
+      document.getElementById("inventorySlider").value = preset.inventory;
+      document.getElementById("engagementSlider").value = preset.engagement;
+      document.getElementById("conversionSlider").value = preset.conversion;
+
+      updateSliderDisplay();
+
+      document.querySelectorAll('#scenario .btn-secondary').forEach(button => {
+        button.dataset.activePreset = "false";
+      });
+
+      toast("Scenario preset applied. Run the scenario to compare results.");
+    }
+
+    function resetScenario() {
+      ["demandSlider", "inventorySlider", "engagementSlider", "conversionSlider"]
+        .forEach(id => {
+          document.getElementById(id).value = 0;
+        });
+
+      updateSliderDisplay();
+
+      document.getElementById("scenarioComparison").innerHTML =
+        '<p style="color:#77716c;">Run a scenario to see the comparison.</p>';
+
+      document.getElementById("scenarioAction").textContent = "—";
+      document.getElementById("scenarioConfidence").textContent = "Confidence —";
+
+      document.getElementById("scenarioExplanation").textContent =
+        "No scenario has been run yet.";
+
+      document.getElementById("scenarioTechnical").textContent =
+        "No scenario yet.";
+    }
+
+    async function runScenario() {
+      const filename = document.getElementById("unifiedFile").value;
+
+      if (!filename) {
+        toast("Select a unified dataset first.", "error");
+        return;
+      }
+
+      setLoading("scenarioBtn", true);
+
+      const formData = new FormData();
+
+      formData.append("processed_filename", filename);
+      formData.append("demand_change_pct", document.getElementById("demandSlider").value);
+      formData.append("inventory_change_pct", document.getElementById("inventorySlider").value);
+      formData.append("engagement_change_pct", document.getElementById("engagementSlider").value);
+      formData.append("conversion_change_pct", document.getElementById("conversionSlider").value);
+
+      try {
+        const response = await fetch(`${API}/phase4/scenario`, {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+          toast(data.error, "error");
+          return;
+        }
+
+        document.getElementById("scenarioTechnical").textContent =
+          JSON.stringify(data, null, 2);
+
+        renderScenarioComparison(data.comparison || {});
+
+        document.getElementById("scenarioAction").textContent =
+          data.recommendation?.action || "—";
+
+        document.getElementById("scenarioConfidence").textContent =
+          `Confidence ${data.scenario_confidence || "—"}`;
+
+        document.getElementById("scenarioExplanation").textContent =
+          data.explanation || "No explanation returned.";
+
+        toast("Scenario completed.");
+      } catch (error) {
+        toast("Scenario analysis failed.", "error");
+      } finally {
+        setLoading("scenarioBtn", false);
+      }
+    }
+
+    function renderScenarioComparison(comparison) {
+      const container = document.getElementById("scenarioComparison");
+
+      const names = {
+        demand_pressure: "Demand",
+        stock_risk: "Stock Risk",
+        engagement_momentum: "Engagement",
+        conversion_strength: "Conversion",
+        overall_signal: "Overall"
+      };
+
+      container.innerHTML = "";
+
+      Object.entries(names).forEach(([key, label]) => {
+        const metric = comparison[key];
+
+        if (!metric) return;
+
+        const row = document.createElement("div");
+        row.className = "comparison-row";
+
+        const difference =
+          metric.difference > 0
+            ? `+${metric.difference}`
+            : metric.difference;
+
+        row.innerHTML = `
+          <strong>${label}</strong>
+          <span class="comparison-number">${metric.baseline}</span>
+          <span>→</span>
+          <span class="comparison-number">
+            ${metric.scenario}
+            <small style="display:block;font-family:Inter;font-size:.72rem;color:#777;">
+              ${difference}
+            </small>
+          </span>
+        `;
+
+        container.appendChild(row);
+      });
+    }
+
+    // slider listeners
+    [
+      "demandSlider",
+      "inventorySlider",
+      "engagementSlider",
+      "conversionSlider"
+    ].forEach(id => {
+      document.getElementById(id).addEventListener("input", updateSliderDisplay);
+    });
+
+    // scroll progress + back-to-top
+    window.addEventListener("scroll", () => {
+      const scrollTop = window.scrollY;
+      const docHeight =
+        document.documentElement.scrollHeight - window.innerHeight;
+
+      const progress = docHeight > 0
+        ? (scrollTop / docHeight) * 100
+        : 0;
+
+      document.getElementById("scrollProgress").style.width =
+        `${progress}%`;
+
+      document.getElementById("backToTop").classList.toggle(
+        "show",
+        scrollTop > 500
+      );
+    });
+
+    // active nav
+    const sections = [...document.querySelectorAll("main section")];
+    const navLinks = [...document.querySelectorAll(".nav-link")];
+
+    const sectionObserver = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+
+          navLinks.forEach(link => link.classList.remove("active"));
+
+          const active = document.querySelector(
+            `.nav-link[href="#${entry.target.id}"]`
+          );
+
+          if (active) active.classList.add("active");
+        });
+      },
+      {
+        rootMargin: "-35% 0px -55% 0px"
+      }
+    );
+
+    sections.forEach(section => sectionObserver.observe(section));
+
+    // reveal animation
+    const revealObserver = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          }
+        });
+      },
+      {
+        threshold: 0.12
+      }
+    );
+
+    document.querySelectorAll(".reveal").forEach(el => {
+      revealObserver.observe(el);
+    });
+
+    async function initialize() {
+      updateSliderDisplay();
+
+      await Promise.all([
+        loadProcessedFiles(),
+        loadUnifiedFiles()
+      ]);
+    }
+
+    initialize();
   </script>
 </body>
 </html>
