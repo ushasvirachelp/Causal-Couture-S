@@ -1,0 +1,4 @@
+date,sku_id,opening_stock,closing_stock,sell_through_rate,low_stock_flag
+2025-07-01,SKU001,300,150,0.5,0
+2025-07-02,SKU002,250,19,0.924,0
+2025-07-03,SKU003,1000,999,0.001,0

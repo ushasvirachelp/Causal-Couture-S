@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 import json
@@ -10,6 +10,16 @@ from scenario import run_scenario
 from trends import build_trend_summary
 from dashboard import build_dashboard
 from analytics import build_scorecard
+from causal_dataset import build_causal_dataset, get_causal_dataset_summary
+from causal_estimator import estimate_engagement_effect
+from causal_validation import bootstrap_engagement_effect, run_placebo_test
+from causal_overlap import analyze_treatment_overlap
+from causal_stockout import analyze_stockout_bias, add_inventory_demand_status
+from causal_evidence import build_causal_evidence_summary
+from causal_robustness import run_robustness_checks
+from causal_intelligence import build_causal_intelligence
+from causal_cluster_bootstrap import cluster_bootstrap_engagement_effect
+from causal_temporal_placebo import run_temporal_placebo_test
 
 app = FastAPI(title="Causal Couture API")
 
@@ -644,50 +654,306 @@ def phase4_intelligence(
         return {
             "error": f"Intelligence generation failed: {str(e)}"
         }
-@app.post("/phase4/intelligence")
-def phase4_intelligence(
-    processed_filename: str = Form(...),
-    demand_change_pct: float = Form(0),
-    inventory_change_pct: float = Form(0),
-    engagement_change_pct: float = Form(0),
-    conversion_change_pct: float = Form(0),
-) -> dict[str, Any]:
-    file_path = UNIFIED_DIR / processed_filename
-
-    if not file_path.exists():
-        return {
-            "error": f"Unified file not found: {processed_filename}"
-        }
+@app.get("/phase5/causal-dataset")
+def phase5_causal_dataset(filename: str):
+    """
+    Build and inspect the Phase 5 causal-analysis dataset
+    from an existing unified dataset.
+    """
 
     try:
+        file_path = UNIFIED_DIR / filename
+        if not file_path.exists():
+            raise FileNotFoundError(f"Unified file not found: {filename}")
+
         df = pd.read_csv(file_path)
 
-        dashboard_result = build_dashboard(df)
+        causal_df = build_causal_dataset(df)
+        causal_df = add_inventory_demand_status(causal_df)
+        summary = get_causal_dataset_summary(causal_df)
 
-        scenario_result = run_scenario(
-            df=df,
-            demand_change_pct=demand_change_pct,
-            inventory_change_pct=inventory_change_pct,
-            engagement_change_pct=engagement_change_pct,
-            conversion_change_pct=conversion_change_pct,
+        preview_columns = [
+            column
+            for column in [
+                "date",
+                "sku_id",
+                "engagement_rate_t",
+                "engagement_rate_lag1",
+                "units_sold_t",
+                "units_sold_lag1",
+                "units_sold_next_day",
+                "next_observed_date",
+                "days_to_next_observation",
+                "closing_stock_t",
+                "product_views_t",
+                "view_to_cart_rate_t",
+                "inventory_constrained_flag",
+                "demand_observation_status",
+                "causal_row_valid",
+            ]
+            if column in causal_df.columns
+        ]
+
+        preview = (
+            causal_df[preview_columns]
+            .head(25)
+            .copy()
         )
 
+        if "date" in preview.columns:
+            preview["date"] = preview["date"].astype(str)
+
         return {
-            "processed_filename": processed_filename,
-            "dashboard": dashboard_result,
-            "scenario": scenario_result,
+            "phase": "Phase 5",
+            "analysis_type": "causal_dataset_preparation",
+            "causal_question": (
+                "What is the causal effect of social engagement "
+                "on subsequent product sales?"
+            ),
+            "treatment": "engagement_rate_t",
+            "outcome": "units_sold_next_day",
+            "summary": summary,
+            "preview": preview.to_dict(orient="records"),
             "methodology_note": (
-                "Dashboard metrics are heuristic/descriptive signals. "
-                "Scenario outputs are structured simulations, not causal estimates."
+                "This endpoint prepares temporal variables for causal analysis. "
+                "It does not estimate a causal effect."
             ),
         }
 
-    except ValueError as e:
+    except FileNotFoundError as exc:
+        raise HTTPException(
+            status_code=404,
+            detail=str(exc),
+        )
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+        )
+
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to build causal dataset: {str(exc)}",
+        )
+@app.get("/phase5/causal-effect")
+def phase5_causal_effect(filename: str):
+    """
+    Estimate the first Phase 5 engagement -> subsequent sales effect
+    from an existing unified dataset.
+    """
+
+    try:
+        file_path = UNIFIED_DIR / filename
+        if not file_path.exists():
+            raise FileNotFoundError(f"Unified file not found: {filename}")
+
+        df = pd.read_csv(file_path)
+
+        causal_df = build_causal_dataset(df)
+        causal_df = add_inventory_demand_status(causal_df)
+
+        estimate = estimate_engagement_effect(causal_df)
+
         return {
-            "error": str(e)
+            "phase": "Phase 5",
+            "analysis_type": "causal_effect_estimation",
+            "causal_question": (
+                "What is the causal effect of social engagement "
+                "on subsequent product sales?"
+            ),
+            "treatment": "engagement_rate_t",
+            "outcome": "units_sold_next_day",
+            "estimate": estimate,
+            "methodology_note": (
+                "This endpoint uses an adjusted observational linear model. "
+                "The result depends on the assumed DAG, available confounders, "
+                "temporal ordering, and inventory constraints."
+            ),
         }
 
-    except Exception as e:
+    except FileNotFoundError as exc:
+        raise HTTPException(
+            status_code=404,
+            detail=str(exc),
+        )
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+        )
+
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to estimate causal effect: {str(exc)}",
+        )
+
+@app.get("/phase5/causal-validation")
+def phase5_causal_validation(filename: str):
+    """
+    Run the Phase 5 engagement-effect estimate with uncertainty,
+    placebo testing, and treatment-overlap diagnostics.
+    """
+
+    try:
+        file_path = UNIFIED_DIR / filename
+        if not file_path.exists():
+            raise FileNotFoundError(f"Unified file not found: {filename}")
+
+        df = pd.read_csv(file_path)
+        causal_df = build_causal_dataset(df)
+        causal_df = add_inventory_demand_status(causal_df)
+
+        estimate = estimate_engagement_effect(causal_df)
+
+        bootstrap = bootstrap_engagement_effect(
+            causal_df,
+            estimate_engagement_effect,
+        )
+
+        cluster_bootstrap = cluster_bootstrap_engagement_effect(
+            causal_df,
+            estimate_engagement_effect,
+        )
+
+        placebo = run_placebo_test(causal_df)
+        temporal_placebo = run_temporal_placebo_test(causal_df)
+        overlap = analyze_treatment_overlap(causal_df)
+        stockout = analyze_stockout_bias(causal_df)
+        robustness = run_robustness_checks(causal_df)
+
+        evidence = build_causal_evidence_summary(
+            estimate=estimate,
+            uncertainty=bootstrap,
+            placebo=placebo,
+            overlap=overlap,
+            stockout=stockout,
+        )
+
         return {
-            "error": f"Intelligence generation failed: {str(e)}"
+            "phase": "Phase 5",
+            "analysis_type": "causal_effect_validation",
+            "causal_question": (
+                "What is the causal effect of social engagement "
+                "on subsequent product sales?"
+            ),
+            "treatment": "engagement_rate_t",
+            "outcome": "units_sold_next_day",
+            "estimate": estimate,
+            "uncertainty": bootstrap,
+            "cluster_uncertainty": cluster_bootstrap,
+            "placebo_test": placebo,
+            "temporal_placebo_test": temporal_placebo,
+            "overlap_diagnostic": overlap,
+            "stockout_diagnostic": stockout,
+            "robustness_diagnostic": robustness,
+            "evidence_summary": evidence,
+            "interpretation_guide": {
+                "estimate": (
+                    "The adjusted engagement coefficient from the "
+                    "observational model."
+                ),
+                "confidence_interval": (
+                    "The row-level bootstrap interval describes uncertainty "
+                    "around the estimated coefficient."
+                ),
+                "cluster_confidence_interval": (
+                    "The SKU-level cluster bootstrap resamples entire products "
+                    "to better preserve dependence among repeated observations "
+                    "of the same SKU."
+                ),
+                "placebo": (
+                    "The shuffled-treatment estimate should ideally "
+                    "be much weaker than the original estimate."
+                ),
+                "temporal_placebo": (
+                    "Tests the deliberately impossible direction of future "
+                    "next-day engagement predicting current sales. A large "
+                    "coefficient is a warning signal for residual temporal "
+                    "structure or model misspecification, not causal evidence."
+                ),
+                "overlap": (
+                    "Checks whether engagement has enough observed "
+                    "variation to support meaningful treatment comparisons."
+                ),
+                "stockout": (
+                    "Checks whether low or zero inventory may suppress "
+                    "observed sales and distort demand measurement."
+                ),
+                "robustness": (
+                    "Compares the engagement effect across alternative model "
+                    "specifications to identify specification sensitivity."
+                ),
+                "evidence_summary": (
+                    "Combines the estimate and diagnostics into a transparent "
+                    "observational-evidence summary. The evidence score is not "
+                    "a probability that the effect is causal."
+                ),
+            },
+            "methodology_note": (
+                "These diagnostics improve transparency around row-level and "
+                "SKU-cluster uncertainty, shuffled-placebo behavior, temporal falsification, "
+                "treatment variation, inventory constraints, and "
+                "model-specification stability, but they do not by themselves "
+                "establish causal identification."
+            ),
         }
+
+    except FileNotFoundError as exc:
+        raise HTTPException(
+            status_code=404,
+            detail=str(exc),
+        )
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+        )
+
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to validate causal estimate: {str(exc)}",
+        )
+
+@app.get("/phase5/causal-intelligence")
+def phase5_causal_intelligence(filename: str):
+    """
+    Build the complete Phase 5 causal-intelligence response
+    from an existing unified date × SKU dataset.
+    """
+
+    try:
+        file_path = UNIFIED_DIR / filename
+        if not file_path.exists():
+            raise FileNotFoundError(f"Unified file not found: {filename}")
+
+        df = pd.read_csv(file_path)
+
+        result = build_causal_intelligence(df)
+        result["filename"] = filename
+
+        return result
+
+    except FileNotFoundError as exc:
+        raise HTTPException(
+            status_code=404,
+            detail=str(exc),
+        )
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+        )
+
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to build causal intelligence: {str(exc)}",
+        )
+

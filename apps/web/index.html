@@ -673,6 +673,152 @@
         padding: 54px 0;
       }
     }
+
+
+    /* Phase 5 causal intelligence */
+    .causal-hero-card {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, rgba(250,247,242,.98), rgba(244,237,242,.95));
+      border: 1px solid rgba(77,42,66,.14);
+    }
+
+    .causal-hero-card::after {
+      content: "";
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      right: -90px;
+      top: -90px;
+      border-radius: 50%;
+      background: rgba(91,49,78,.06);
+      pointer-events: none;
+    }
+
+    .causal-effect-value {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.5rem, 6vw, 4.8rem);
+      line-height: .95;
+      letter-spacing: -.045em;
+      margin: 12px 0 10px;
+    }
+
+    .causal-effect-sub {
+      max-width: 620px;
+      color: #68625e;
+      line-height: 1.65;
+    }
+
+    .causal-status-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .causal-metric {
+      min-height: 156px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .causal-metric strong {
+      display: block;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.7rem;
+      font-weight: 500;
+      margin-top: 8px;
+    }
+
+    .causal-metric small {
+      color: #77716c;
+      line-height: 1.5;
+    }
+
+    .diagnostic-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .diagnostic-row {
+      display: grid;
+      grid-template-columns: minmax(150px, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+      padding: 13px 0;
+      border-bottom: 1px solid rgba(48,42,38,.09);
+    }
+
+    .diagnostic-row:last-child {
+      border-bottom: 0;
+    }
+
+    .diagnostic-label {
+      font-size: .9rem;
+      color: #655f5a;
+    }
+
+    .diagnostic-value {
+      text-align: right;
+      font-weight: 650;
+      font-size: .9rem;
+    }
+
+    .signal-boundary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .signal-boundary > div {
+      padding: 15px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.56);
+      border: 1px solid rgba(48,42,38,.09);
+    }
+
+    .signal-boundary strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: .84rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .signal-boundary span {
+      color: #706a65;
+      font-size: .84rem;
+      line-height: 1.45;
+    }
+
+    .causal-warning {
+      margin-top: 18px;
+      padding: 15px 17px;
+      border-left: 3px solid #5b314e;
+      background: rgba(91,49,78,.055);
+      color: #625b57;
+      line-height: 1.6;
+      font-size: .88rem;
+    }
+
+    @media (max-width: 760px) {
+      .signal-boundary {
+        grid-template-columns: 1fr;
+      }
+
+      .diagnostic-row {
+        grid-template-columns: 1fr;
+        gap: 4px;
+      }
+
+      .diagnostic-value {
+        text-align: left;
+      }
+    }
+
   </style>
 </head>
 
@@ -688,6 +834,7 @@
         <a href="#data" class="nav-link">Data</a>
         <a href="#intelligence" class="nav-link">Intelligence</a>
         <a href="#scenario" class="nav-link">Scenario Lab</a>
+        <a href="#causal" class="nav-link">Causal</a>
         <a href="#insights" class="nav-link">Insights</a>
       </div>
     </div>
@@ -1111,6 +1258,158 @@
       </div>
     </section>
 
+
+    <section id="causal">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">Phase 5 · Causal Intelligence</div>
+          <h2>From association to an estimated effect</h2>
+        </div>
+
+        <p>
+          Estimate how social engagement relates to next-day product sales
+          under the current observational assumptions, then inspect the
+          diagnostics behind that estimate.
+        </p>
+      </div>
+
+      <div class="grid grid-2 reveal">
+        <div class="card causal-hero-card">
+          <div class="eyebrow">Estimated Engagement Effect</div>
+          <div class="causal-effect-value" id="causalEffect">—</div>
+          <div class="causal-effect-sub" id="causalExecutiveSummary">
+            Select a unified dataset and run causal intelligence.
+          </div>
+
+          <div class="causal-status-row">
+            <span class="pill" id="causalDirection">Direction —</span>
+            <span class="pill" id="causalEvidenceLevel">Evidence —</span>
+            <span class="pill" id="causalRobustness">Robustness —</span>
+          </div>
+
+          <div class="button-row" style="margin-top:22px;">
+            <button id="causalBtn" class="btn btn-plum" onclick="loadCausalIntelligence()">
+              Run Causal Intelligence
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="eyebrow">Business-Scale Interpretation</div>
+          <h3 style="margin-top:8px;">+10 percentage-point engagement change</h3>
+          <div class="causal-effect-value" style="font-size:clamp(2rem,4vw,3.5rem);" id="causalEffect10">—</div>
+          <p id="causalEffect10Text" style="color:#68625e;line-height:1.65;">
+            The model will translate the coefficient into an easier-to-read
+            +10 percentage-point engagement change.
+          </p>
+
+          <div class="mini-stack" style="margin-top:20px;">
+            <div class="mini-row">
+              <span>95% bootstrap interval</span>
+              <strong id="causalCI">—</strong>
+            </div>
+            <div class="mini-row">
+              <span>Rows used</span>
+              <strong id="causalRows">—</strong>
+            </div>
+            <div class="mini-row">
+              <span>Treatment</span>
+              <strong>engagement_rate_t</strong>
+            </div>
+            <div class="mini-row">
+              <span>Outcome</span>
+              <strong>next-day sales</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-4 reveal" style="margin-top:18px;">
+        <div class="card causal-metric">
+          <div>
+            <div class="eyebrow">Evidence</div>
+            <strong id="causalEvidenceScore">—</strong>
+          </div>
+          <small>Internal observational-support diagnostic, not a probability of causality.</small>
+        </div>
+
+        <div class="card causal-metric">
+          <div>
+            <div class="eyebrow">Placebo</div>
+            <strong id="causalPlacebo">—</strong>
+          </div>
+          <small>Shuffled-treatment comparison against the original estimate.</small>
+        </div>
+
+        <div class="card causal-metric">
+          <div>
+            <div class="eyebrow">Overlap</div>
+            <strong id="causalOverlap">—</strong>
+          </div>
+          <small>Basic treatment-variation diagnostic across observed engagement.</small>
+        </div>
+
+        <div class="card causal-metric">
+          <div>
+            <div class="eyebrow">Inventory Risk</div>
+            <strong id="causalStockout">—</strong>
+          </div>
+          <small>Checks whether low or zero stock may suppress observed demand.</small>
+        </div>
+      </div>
+
+      <div class="grid grid-2 reveal" style="margin-top:18px;">
+        <div class="card">
+          <div class="eyebrow">Diagnostic Readout</div>
+          <div class="diagnostic-list">
+            <div class="diagnostic-row">
+              <span class="diagnostic-label">Primary estimator</span>
+              <span class="diagnostic-value" id="causalEstimatorStatus">Waiting</span>
+            </div>
+            <div class="diagnostic-row">
+              <span class="diagnostic-label">Bootstrap uncertainty</span>
+              <span class="diagnostic-value" id="causalBootstrapStatus">Waiting</span>
+            </div>
+            <div class="diagnostic-row">
+              <span class="diagnostic-label">Placebo behavior</span>
+              <span class="diagnostic-value" id="causalPlaceboStatus">Waiting</span>
+            </div>
+            <div class="diagnostic-row">
+              <span class="diagnostic-label">Specification stability</span>
+              <span class="diagnostic-value" id="causalRobustnessStatus">Waiting</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="eyebrow">Analytical Boundary</div>
+          <div class="signal-boundary">
+            <div>
+              <strong>Observed Signal</strong>
+              <span>Descriptive and heuristic patterns in the current retail data.</span>
+            </div>
+            <div>
+              <strong>Scenario Simulation</strong>
+              <span>Structured what-if changes. Not a forecast and not a causal estimate.</span>
+            </div>
+            <div>
+              <strong>Estimated Causal Effect</strong>
+              <span>Observational estimate conditional on the stated DAG and assumptions.</span>
+            </div>
+          </div>
+
+          <div class="causal-warning" id="causalWarning">
+            This analysis does not constitute experimental proof of causation.
+          </div>
+        </div>
+      </div>
+
+      <details class="reveal" style="margin-top:18px;">
+        <summary>Full causal intelligence API response</summary>
+        <pre id="causalTechnical">No causal analysis loaded.</pre>
+      </details>
+    </section>
+
     <section id="insights">
       <div class="section-heading">
         <div>
@@ -1491,6 +1790,144 @@
         toast("Dashboard loading failed.", "error");
       } finally {
         setLoading("dashboardBtn", false);
+      }
+    }
+
+
+    function formatCausalNumber(value, digits = 4) {
+      const number = Number(value);
+      if (!Number.isFinite(number)) return "—";
+      return number.toFixed(digits).replace(/\.?0+$/, "");
+    }
+
+    function normalizeCausalLabel(value) {
+      if (value === null || value === undefined || value === "") return "—";
+      return String(value)
+        .replaceAll("_", " ")
+        .toLowerCase()
+        .replace(/\b\w/g, character => character.toUpperCase());
+    }
+
+    async function loadCausalIntelligence() {
+      const filename = document.getElementById("unifiedFile").value;
+
+      if (!filename) {
+        toast("Select a unified dataset first.", "error");
+        return;
+      }
+
+      setLoading("causalBtn", true);
+
+      try {
+        const response = await fetch(
+          `${API}/phase5/causal-intelligence?filename=${encodeURIComponent(filename)}`
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || data.error || data.detail) {
+          toast(data.detail || data.error || "Causal analysis failed.", "error");
+          return;
+        }
+
+        document.getElementById("causalTechnical").textContent =
+          JSON.stringify(data, null, 2);
+
+        const effect = data.estimated_effect;
+        const effect10 = data.estimated_effect_per_10_percentage_point_engagement_increase;
+        const estimate = data.estimate || {};
+        const uncertainty = data.uncertainty || {};
+        const placebo = data.placebo_test || {};
+        const overlap = data.overlap_diagnostic || {};
+        const stockout = data.stockout_diagnostic || {};
+        const robustness = data.robustness_diagnostic || {};
+        const evidence = data.evidence_summary || {};
+
+        document.getElementById("causalEffect").textContent =
+          effect === null || effect === undefined
+            ? "—"
+            : formatCausalNumber(effect, 4);
+
+        document.getElementById("causalExecutiveSummary").textContent =
+          data.executive_summary || "No executive summary returned.";
+
+        document.getElementById("causalDirection").textContent =
+          `Direction ${normalizeCausalLabel(data.effect_direction)}`;
+
+        document.getElementById("causalEvidenceLevel").textContent =
+          `Evidence ${normalizeCausalLabel(evidence.evidence_level)}`;
+
+        document.getElementById("causalRobustness").textContent =
+          `Robustness ${normalizeCausalLabel(robustness.robustness_status)}`;
+
+        document.getElementById("causalEffect10").textContent =
+          effect10 === null || effect10 === undefined
+            ? "—"
+            : `${Number(effect10) > 0 ? "+" : ""}${formatCausalNumber(effect10, 4)}`;
+
+        document.getElementById("causalEffect10Text").textContent =
+          effect10 === null || effect10 === undefined
+            ? "A business-scale interpretation could not be calculated for this dataset."
+            : `Under the current observational model, a +10 percentage-point engagement increase corresponds to an estimated ${Number(effect10) >= 0 ? "increase" : "decrease"} of ${formatCausalNumber(Math.abs(effect10), 4)} next-day units sold, conditional on the current model assumptions.`;
+
+        const ci = uncertainty.confidence_interval_95 || evidence.confidence_interval_95 || {};
+        const lower = ci.lower;
+        const upper = ci.upper;
+
+        document.getElementById("causalCI").textContent =
+          lower !== null && lower !== undefined && upper !== null && upper !== undefined
+            ? `${formatCausalNumber(lower, 4)} to ${formatCausalNumber(upper, 4)}`
+            : "Unavailable";
+
+        document.getElementById("causalRows").textContent =
+          estimate.rows_used ?? data.dataset?.valid_causal_rows ?? data.dataset?.rows ?? "—";
+
+        document.getElementById("causalEvidenceScore").textContent =
+          evidence.evidence_score !== null && evidence.evidence_score !== undefined
+            ? `${formatCausalNumber(evidence.evidence_score, 1)}/100`
+            : "—";
+
+        document.getElementById("causalPlacebo").textContent =
+          placebo.placebo_effect !== null && placebo.placebo_effect !== undefined
+            ? formatCausalNumber(placebo.placebo_effect, 4)
+            : normalizeCausalLabel(placebo.status);
+
+        document.getElementById("causalOverlap").textContent =
+          normalizeCausalLabel(overlap.overlap_status || overlap.status);
+
+        const stockoutLevel = stockout.suppressed_demand_risk?.level;
+        document.getElementById("causalStockout").textContent =
+          normalizeCausalLabel(stockoutLevel || stockout.status);
+
+        document.getElementById("causalEstimatorStatus").textContent =
+          normalizeCausalLabel(estimate.status);
+
+        document.getElementById("causalBootstrapStatus").textContent =
+          normalizeCausalLabel(uncertainty.status);
+
+        const placeboCheck = (evidence.checks || []).find(
+          item => item.check === "placebo_weaker_than_original"
+        );
+
+        document.getElementById("causalPlaceboStatus").textContent =
+          placeboCheck
+            ? (placeboCheck.passed ? "Weaker than original" : "Needs review")
+            : normalizeCausalLabel(placebo.status);
+
+        document.getElementById("causalRobustnessStatus").textContent =
+          normalizeCausalLabel(
+            robustness.direction_consistency || robustness.robustness_status
+          );
+
+        document.getElementById("causalWarning").textContent =
+          data.causal_warning ||
+          "This observational estimate depends on the stated identification assumptions and is not experimental proof of causation.";
+
+        toast("Causal intelligence updated.");
+      } catch (error) {
+        toast("Could not load causal intelligence.", "error");
+      } finally {
+        setLoading("causalBtn", false);
       }
     }
 

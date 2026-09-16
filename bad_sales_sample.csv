@@ -1,4 +1,4 @@
 date,sku_id,units_sold,revenue
-2025-07-01,SKU001,five,250
-wrong-date,SKU002,3,180
-2025-07-03,,8,400
+7/1/25,SKU001,5,250
+7/2/25,SKU002,3,180
+7/3/25,SKU003,8,400
