@@ -20,6 +20,7 @@ from causal_robustness import run_robustness_checks
 from causal_intelligence import build_causal_intelligence
 from causal_cluster_bootstrap import cluster_bootstrap_engagement_effect
 from causal_temporal_placebo import run_temporal_placebo_test
+from causal_sensitivity import run_unobserved_confounding_sensitivity
 
 app = FastAPI(title="Causal Couture API")
 
@@ -821,6 +822,10 @@ def phase5_causal_validation(filename: str):
 
         placebo = run_placebo_test(causal_df)
         temporal_placebo = run_temporal_placebo_test(causal_df)
+        sensitivity = run_unobserved_confounding_sensitivity(
+            causal_df,
+            estimate_engagement_effect,
+        )
         overlap = analyze_treatment_overlap(causal_df)
         stockout = analyze_stockout_bias(causal_df)
         robustness = run_robustness_checks(causal_df)
@@ -847,6 +852,7 @@ def phase5_causal_validation(filename: str):
             "cluster_uncertainty": cluster_bootstrap,
             "placebo_test": placebo,
             "temporal_placebo_test": temporal_placebo,
+            "unobserved_confounding_sensitivity": sensitivity,
             "overlap_diagnostic": overlap,
             "stockout_diagnostic": stockout,
             "robustness_diagnostic": robustness,

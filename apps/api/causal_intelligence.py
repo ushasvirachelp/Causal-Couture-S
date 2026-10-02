@@ -1,160 +1,90 @@
-from typing import Any
-
+from typing import Any, Callable
 import pandas as pd
-
 from causal_dataset import build_causal_dataset, get_causal_dataset_summary
 from causal_estimator import estimate_engagement_effect
 from causal_validation import bootstrap_engagement_effect, run_placebo_test
 from causal_cluster_bootstrap import cluster_bootstrap_engagement_effect
 from causal_temporal_placebo import run_temporal_placebo_test
+from causal_sensitivity import run_unobserved_confounding_sensitivity
 from causal_overlap import analyze_treatment_overlap
 from causal_stockout import analyze_stockout_bias, add_inventory_demand_status
 from causal_evidence import build_causal_evidence_summary
 from causal_robustness import run_robustness_checks
 
+def _safe_diagnostic(name: str, function: Callable, *args) -> dict[str, Any]:
+    try:
+        result=function(*args)
+        if isinstance(result,dict):
+            return result
+        return {"status":"diagnostic_error","diagnostic":name,
+                "error":"Diagnostic returned a non-dictionary result."}
+    except Exception as exc:
+        return {"status":"diagnostic_error","diagnostic":name,"error":str(exc)}
 
 def build_causal_intelligence(df: pd.DataFrame) -> dict[str, Any]:
-    """
-    Build the complete Phase 5 causal-intelligence response for:
-    social engagement at time t -> product sales on the next calendar day.
+    causal_df=build_causal_dataset(df)
+    causal_df=add_inventory_demand_status(causal_df)
+    dataset_summary=get_causal_dataset_summary(causal_df)
+    estimate=estimate_engagement_effect(causal_df)
 
-    This remains observational causal analysis and does not constitute
-    experimental proof of causation.
-    """
-    causal_df = build_causal_dataset(df)
-    causal_df = add_inventory_demand_status(causal_df)
-    dataset_summary = get_causal_dataset_summary(causal_df)
+    uncertainty=_safe_diagnostic("row_bootstrap",bootstrap_engagement_effect,
+                                 causal_df,estimate_engagement_effect)
+    cluster=_safe_diagnostic("sku_cluster_bootstrap",cluster_bootstrap_engagement_effect,
+                             causal_df,estimate_engagement_effect)
+    placebo=_safe_diagnostic("shuffled_placebo",run_placebo_test,causal_df)
+    temporal=_safe_diagnostic("temporal_placebo",run_temporal_placebo_test,causal_df)
+    sensitivity=_safe_diagnostic("unobserved_confounding_sensitivity",
+                                 run_unobserved_confounding_sensitivity,
+                                 causal_df,estimate_engagement_effect)
+    overlap=_safe_diagnostic("overlap",analyze_treatment_overlap,causal_df)
+    stockout=_safe_diagnostic("stockout",analyze_stockout_bias,causal_df)
+    robustness=_safe_diagnostic("robustness",run_robustness_checks,causal_df)
+    evidence=_safe_diagnostic("evidence_summary",build_causal_evidence_summary,
+                              estimate,uncertainty,placebo,overlap,stockout)
 
-    estimate = estimate_engagement_effect(causal_df)
-
-    uncertainty = bootstrap_engagement_effect(
-        causal_df, estimate_engagement_effect
-    )
-    cluster_uncertainty = cluster_bootstrap_engagement_effect(
-        causal_df, estimate_engagement_effect
-    )
-
-    placebo = run_placebo_test(causal_df)
-    temporal_placebo = run_temporal_placebo_test(causal_df)
-    overlap = analyze_treatment_overlap(causal_df)
-    stockout = analyze_stockout_bias(causal_df)
-    robustness = run_robustness_checks(causal_df)
-
-    # Preserve the existing evidence-score contract. The temporal placebo
-    # is exposed separately rather than silently changing the heuristic score.
-    evidence = build_causal_evidence_summary(
-        estimate=estimate,
-        uncertainty=uncertainty,
-        placebo=placebo,
-        overlap=overlap,
-        stockout=stockout,
-    )
-
-    estimated_effect = estimate.get("estimated_engagement_effect")
-    effect_per_10pct = (
-        float(estimated_effect) * 0.10
-        if estimated_effect is not None
-        else None
-    )
-
-    if estimated_effect is None:
-        effect_direction = "unknown"
-        executive_summary = (
-            "The current dataset does not provide enough usable "
-            "information to estimate the engagement effect."
-        )
-    elif estimated_effect > 0:
-        effect_direction = "positive"
-        executive_summary = (
-            "The current observational model estimates a positive "
-            "relationship between social engagement and next-day "
-            "product sales after adjustment for available historical, "
-            "inventory, product, and time-related factors."
-        )
-    elif estimated_effect < 0:
-        effect_direction = "negative"
-        executive_summary = (
-            "The current observational model estimates a negative "
-            "relationship between social engagement and next-day "
-            "product sales after adjustment for available historical, "
-            "inventory, product, and time-related factors."
-        )
+    effect=estimate.get("estimated_engagement_effect")
+    scaled=float(effect)*0.10 if effect is not None else None
+    if effect is None:
+        direction="unknown"; summary="The current dataset does not provide enough usable information to estimate the engagement effect."
+    elif effect>0:
+        direction="positive"; summary="The current observational model estimates a positive relationship between social engagement and next-day product sales after adjustment for available historical, inventory, product, and time-related factors."
+    elif effect<0:
+        direction="negative"; summary="The current observational model estimates a negative relationship between social engagement and next-day product sales after adjustment for available historical, inventory, product, and time-related factors."
     else:
-        effect_direction = "neutral"
-        executive_summary = (
-            "The current observational model estimates little or no "
-            "change in next-day product sales associated with social "
-            "engagement."
-        )
+        direction="neutral"; summary="The current observational model estimates little or no change in next-day product sales associated with social engagement."
 
     return {
-        "phase": "Phase 5",
-        "analysis_type": "causal_intelligence",
-        "causal_question": (
-            "What is the causal effect of social engagement "
-            "on subsequent product sales?"
-        ),
-        "treatment": "engagement_rate_t",
-        "outcome": "units_sold_next_day",
-        "executive_summary": executive_summary,
-        "effect_direction": effect_direction,
-        "estimated_effect": (
-            round(float(estimated_effect), 6)
-            if estimated_effect is not None else None
-        ),
-        "estimated_effect_per_10_percentage_point_engagement_increase": (
-            round(effect_per_10pct, 6)
-            if effect_per_10pct is not None else None
-        ),
-        "dataset": dataset_summary,
-        "estimate": estimate,
-        "uncertainty": uncertainty,
-        "cluster_uncertainty": cluster_uncertainty,
-        "placebo_test": placebo,
-        "temporal_placebo_test": temporal_placebo,
-        "overlap_diagnostic": overlap,
-        "stockout_diagnostic": stockout,
-        "robustness_diagnostic": robustness,
-        "evidence_summary": evidence,
-        "methodology": {
-            "data_type": "observational",
-            "temporal_structure": (
-                "engagement at time t -> sales on next calendar day"
-            ),
-            "current_adjustment_strategy": [
-                "prior sales",
-                "prior engagement",
-                "inventory availability",
-                "SKU fixed effects",
-                "day-of-week effects",
-            ],
-            "uncertainty_strategy": (
-                "Both row-level bootstrap uncertainty and SKU-level "
-                "cluster-bootstrap uncertainty are reported."
-            ),
-            "temporal_falsification_strategy": (
-                "Future next-calendar-day engagement is tested against "
-                "current sales as a negative-control exposure. Because "
-                "future engagement cannot cause past sales, a large "
-                "temporal-placebo coefficient is treated as a warning "
-                "signal rather than causal evidence."
-            ),
-            "web_variables": (
-                "Product views and conversion variables are not "
-                "automatically controlled because they may lie on "
-                "the pathway between engagement and purchase."
-            ),
-            "inventory_boundary": (
-                "Periods with zero inventory are excluded from the "
-                "primary estimator, while broader low-stock conditions "
-                "are reported separately as suppressed-demand risk."
-            ),
+        "phase":"Phase 5","analysis_type":"causal_intelligence",
+        "causal_question":"What is the causal effect of social engagement on subsequent product sales?",
+        "treatment":"engagement_rate_t","outcome":"units_sold_next_day",
+        "executive_summary":summary,"effect_direction":direction,
+        "estimated_effect":round(float(effect),6) if effect is not None else None,
+        "estimated_effect_per_10_percentage_point_engagement_increase":round(scaled,6) if scaled is not None else None,
+        "diagnostic_status":{
+            "row_bootstrap":uncertainty.get("status"),
+            "cluster_bootstrap":cluster.get("status"),
+            "shuffled_placebo":placebo.get("status"),
+            "temporal_placebo":temporal.get("status"),
+            "confounding_sensitivity":sensitivity.get("status"),
+            "overlap":overlap.get("status"),
+            "stockout":stockout.get("status"),
+            "robustness":robustness.get("status"),
+            "evidence_summary":evidence.get("status"),
         },
-        "causal_warning": (
-            "This is an observational causal-analysis pipeline. "
-            "The estimate depends on the stated DAG and identification "
-            "assumptions and should not be interpreted as experimental "
-            "proof that social engagement causes sales. The diagnostics "
-            "improve transparency but do not establish causal identification."
-        ),
+        "dataset":dataset_summary,"estimate":estimate,
+        "uncertainty":uncertainty,"cluster_uncertainty":cluster,
+        "placebo_test":placebo,"temporal_placebo_test":temporal,
+        "unobserved_confounding_sensitivity":sensitivity,
+        "overlap_diagnostic":overlap,"stockout_diagnostic":stockout,
+        "robustness_diagnostic":robustness,"evidence_summary":evidence,
+        "methodology":{
+            "data_type":"observational",
+            "temporal_structure":"engagement at time t -> sales on next calendar day",
+            "current_adjustment_strategy":["prior sales","prior engagement","inventory availability","SKU fixed effects","day-of-week effects"],
+            "uncertainty_strategy":"Both row-level and SKU-level cluster-bootstrap uncertainty are reported.",
+            "temporal_falsification_strategy":"Future next-calendar-day engagement is tested against current sales as a negative-control exposure.",
+            "unobserved_confounding_strategy":"A synthetic-confounder stress test measures how the estimate changes under progressively stronger hypothetical omitted-confounding pressure. Stress levels are heuristic.",
+            "diagnostic_isolation":"Secondary diagnostics execute independently so one diagnostic error is reported without crashing the consolidated response.",
+        },
+        "causal_warning":"This is observational causal analysis. The diagnostics improve transparency but do not establish experimental causal identification.",
     }
