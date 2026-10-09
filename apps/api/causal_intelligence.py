@@ -10,6 +10,7 @@ from causal_overlap import analyze_treatment_overlap
 from causal_stockout import analyze_stockout_bias, add_inventory_demand_status
 from causal_evidence import build_causal_evidence_summary
 from causal_robustness import run_robustness_checks
+from causal_reliability_review import build_causal_reliability_review
 
 def _safe_diagnostic(name: str, function: Callable, *args) -> dict[str, Any]:
     try:
@@ -39,8 +40,16 @@ def build_causal_intelligence(df: pd.DataFrame) -> dict[str, Any]:
     overlap=_safe_diagnostic("overlap",analyze_treatment_overlap,causal_df)
     stockout=_safe_diagnostic("stockout",analyze_stockout_bias,causal_df)
     robustness=_safe_diagnostic("robustness",run_robustness_checks,causal_df)
-    evidence=_safe_diagnostic("evidence_summary",build_causal_evidence_summary,
-                              estimate,uncertainty,placebo,overlap,stockout)
+    evidence=_safe_diagnostic(
+        "evidence_summary",
+        lambda: build_causal_evidence_summary(
+            estimate=estimate,
+            uncertainty=uncertainty,
+            placebo=placebo,
+            overlap=overlap,
+            stockout=stockout,
+        ),
+    )
 
     effect=estimate.get("estimated_engagement_effect")
     scaled=float(effect)*0.10 if effect is not None else None
@@ -53,7 +62,7 @@ def build_causal_intelligence(df: pd.DataFrame) -> dict[str, Any]:
     else:
         direction="neutral"; summary="The current observational model estimates little or no change in next-day product sales associated with social engagement."
 
-    return {
+    result = {
         "phase":"Phase 5","analysis_type":"causal_intelligence",
         "causal_question":"What is the causal effect of social engagement on subsequent product sales?",
         "treatment":"engagement_rate_t","outcome":"units_sold_next_day",
@@ -88,3 +97,7 @@ def build_causal_intelligence(df: pd.DataFrame) -> dict[str, Any]:
         },
         "causal_warning":"This is observational causal analysis. The diagnostics improve transparency but do not establish experimental causal identification.",
     }
+
+    # Week 10: review the actual Week 9 outputs without rerunning estimators.
+    result["reliability_review"] = build_causal_reliability_review(result)
+    return result

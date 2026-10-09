@@ -963,3 +963,26 @@ def phase5_causal_intelligence(filename: str):
             detail=f"Failed to build causal intelligence: {str(exc)}",
         )
 
+
+
+@app.get("/phase5/causal-reliability-review")
+def phase5_causal_reliability_review(filename: str):
+    """Week 10: summarize existing Phase 5 diagnostic results conservatively."""
+    try:
+        file_path = UNIFIED_DIR / filename
+        if not file_path.is_file():
+            raise FileNotFoundError(f"Unified file not found: {filename}")
+        df = pd.read_csv(file_path)
+        intelligence = build_causal_intelligence(df)
+        review = intelligence["reliability_review"]
+        review["filename"] = filename
+        return review
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to build causal reliability review: {str(exc)}",
+        )
