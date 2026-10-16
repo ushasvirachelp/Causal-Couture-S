@@ -1,0 +1,48 @@
+CAUSAL COUTURE — WEEK 12 CODE PACKAGE
+Focus: apply the Week 11 documented framework to ACTUAL Phase 5 output.
+
+Checked against the current GitHub main branch's Week 10 implementation.
+Week 11 was documentation-only, so no Week 11 Python module is required.
+
+FILES TO ADD (all NEW; NO existing files are replaced):
+  apps/api/causal_evidence_review.py
+  apps/api/run_week12_evidence_review.py
+  apps/api/test_week12_evidence_review.py
+  docs/WEEK12_INSTALL_AND_RUN.txt
+
+Install: unzip the archive into the ROOT of Causal-Couture-Solo so the
+apps/api and docs folders merge with the existing project folders.
+
+Run the tests in VS Code terminal:
+  cd ~/Desktop/Causal-Couture-Solo/apps/api
+  source .venv/bin/activate
+  python3 -m unittest -v test_week12_evidence_review.py
+
+Run against your existing unified CSV:
+  python3 run_week12_evidence_review.py --unified-csv ../../data/processed/unified/YOUR_FILENAME.csv
+
+OR run against an existing JSON response saved from /phase5/causal-intelligence:
+  python3 run_week12_evidence_review.py --input-json /path/to/phase5_output.json
+
+Outputs (created locally, NOT automatically committed):
+  reports/week12/week12_evidence_review.json
+  reports/week12/week12_evidence_review.md
+
+The CLI reuses existing Phase 5 estimators when you choose --unified-csv.
+For large data this may take some time due to bootstrap diagnostics.
+The --input-json option is faster and does not rerun estimation.
+
+The review flags execution gaps, disagreement between row and SKU-cluster
+bootstrap interval interpretations, simulated confounding direction changes,
+poor observed engagement variation, and inventory pressure. It also records
+placebo coefficients for MANUAL comparison, without arbitrary pass/fail cutoffs.
+It NEVER certifies causality or recommends automated business actions.
+
+Only after local validation, stage the specific source files:
+  cd ~/Desktop/Causal-Couture-Solo
+  git add apps/api/causal_evidence_review.py apps/api/run_week12_evidence_review.py apps/api/test_week12_evidence_review.py docs/WEEK12_INSTALL_AND_RUN.txt
+  git diff --cached --stat
+  git commit -m "Add Week 12 reproducible causal evidence review"
+  git push origin main
+
+Do not use git add . (would include generated CSVs, cache, or unrelated files).
